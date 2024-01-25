@@ -1,0 +1,207 @@
+import networkx as nx 
+
+class Simplex:
+    def __init__(self, vertices,value=0.0):
+        self.vertices = vertices
+        self.value=value
+
+    def dimension(self):
+        return len(self.vertices) - 1
+
+    def __str__(self):
+        return "Simplex(" + ", ".join(map(str, self.vertices)) + ")"
+
+class SimplicialComplex:
+    def __init__(self):
+        self.simplices = []
+
+    def add_simplex(self, simplex):
+        self.simplices.append(simplex)
+
+    def __str__(self):
+        return "\n".join(map(str, self.simplices))
+    
+    
+def add_simplices(self, simplices):
+    for simplex in simplices:
+        self.add_simplex(simplex)
+    
+
+def dimension_simplicial_complex(simplicial_complex):
+    max_dimension=-1
+
+    for simplex in simplicial_complex.simplices:
+        simplex_dimension=simplex.dimension()
+        if simplex.dimension()>max_dimension:
+            max_dimension=simplex_dimension
+    return max_dimension
+
+def get_faces_of_simplex(simplex):
+    faces=set()
+    vertices=simplex.vertices
+    for i in range (len(vertices)):
+        face_vertices=vertices[:1]+vertices[i+1:]
+        faces.add(tuple(face_vertices))
+    return faces
+
+def get_all_faces(simplicial_complex):
+    all_faces = set()
+
+    for simplex in simplicial_complex.simplices:
+        faces = get_faces_of_simplex(simplex)
+        all_faces.update(faces)
+
+    return all_faces
+
+def get_faces_of_dimension(simplicial_complex, target_dimension):
+    faces = set()
+
+    for simplex in simplicial_complex.simplices:
+        if simplex.dimension() == target_dimension:
+            faces.add(tuple(simplex.vertices))
+
+    return faces
+
+#hay que quitar la posibilidad de que tiene que ser menor o igual a la dimension total/mayor
+def get_star(simplicial_complex, target_simplex):
+    star = SimplicialComplex()  # Crear un nuevo complejo simplicial para almacenar la estrella
+
+    # Agregar el simplex objetivo a la estrella
+    star.add_simplex(target_simplex)
+
+    # Obtener la dimensión del simplex objetivo
+    target_dimension = target_simplex.dimension()
+
+    # Obtener el conjunto de vértices del simplex objetivo
+    target_vertices = set(target_simplex.vertices)
+
+    # Recorrer todos los simplices en el complejo
+    for simplex in simplicial_complex.simplices:
+        # Verificar si el simplex comparte vértices con el simplex objetivo
+        if set(simplex.vertices).intersection(target_vertices):
+            # Verificar si la dimensión del simplex es menor o igual a la del objetivo
+            if simplex.dimension() <= target_dimension:
+                # Agregar el simplex a la estrella si cumple ambas condiciones
+                star.add_simplex(simplex)
+
+    return star
+
+
+
+def get_link(simplicial_complex, target_simplex):
+    link = SimplicialComplex()  # Crear un nuevo complejo simplicial para almacenar el link
+
+    # Obtener el conjunto de vértices del simplex objetivo
+    target_vertices = set(target_simplex.vertices)
+
+    # Recorrer todos los simplices en el complejo
+    for simplex in simplicial_complex.simplices:
+        # Verificar si el simplex comparte al menos un vértice con el simplex objetivo
+        if set(simplex.vertices).intersection(target_vertices):
+            # Verificar si el simplex comparte alguna cara con el simplex objetivo
+            has_common_face = False
+            for vertex in simplex.vertices:
+                face_vertices = [v for v in target_simplex.vertices if v != vertex]
+                if set(face_vertices) == set(simplex.vertices):
+                    has_common_face = True
+                    break
+
+            # Si no comparte una cara, agregar el simplex al link
+            if not has_common_face:
+                link.add_simplex(simplex)
+
+    return link
+
+def euler_characteristic(simplicial_complex):
+    # Contar el número de vértices, aristas y caras
+    num_vertices = sum(1 for simplex in simplicial_complex.simplices if simplex.dimension() == 0)
+    num_edges = sum(1 for simplex in simplicial_complex.simplices if simplex.dimension() == 1)
+    num_faces = sum(1 for simplex in simplicial_complex.simplices if simplex.dimension() == 2)
+
+    # Calcular la característica de Euler
+    euler = num_vertices - num_edges + num_faces
+    return euler
+
+def euler_characteristic_alternative(simplicial_complex):
+    euler = 0
+
+    for k in range(dimension_simplicial_complex(simplicial_complex) + 1):
+        s_k = sum(1 for simplex in simplicial_complex.simplices if simplex.dimension() == k)
+        euler += (-1) ** k * s_k
+
+    return euler
+
+def num_connected_components(simplicial_complex):
+    # Crear un grafo no dirigido a partir del complejo simplicial
+    G = nx.Graph()
+
+    # Agregar las aristas (1-símplices) al grafo
+    for simplex in simplicial_complex.simplices:
+        if simplex.dimension() == 1:
+            G.add_edge(simplex.vertices[0], simplex.vertices[1])
+
+    # Calcular el número de componentes conexas
+    num_components = nx.number_connected_components(G)
+
+    return num_components
+
+
+# Ejemplo de uso:
+if __name__ == "__main__":
+    v0 = Simplex([0])
+    v1 = Simplex([1])
+    v2 = Simplex([2])
+    e01 = Simplex([0, 1])
+    e12 = Simplex([1, 2])
+    t012 = Simplex([0, 1, 2])
+    
+
+    simplicial_complex = SimplicialComplex()
+    simplicial_complex.add_simplex(v0)
+    simplicial_complex.add_simplex(v1)
+    simplicial_complex.add_simplex(v2)
+    simplicial_complex.add_simplex(e01)
+    simplicial_complex.add_simplex(e12)
+    simplicial_complex.add_simplex(t012)
+
+    print(simplicial_complex)
+
+    dimension = dimension_simplicial_complex(simplicial_complex)
+    print("Dimensión del complejo simplicial:", dimension)
+
+    all_faces = get_all_faces(simplicial_complex)
+    print("Conjunto de todas las caras del complejo simplicial:", all_faces)
+
+    dimension = 1  # Dimension de las caras que deseamos obtener
+    faces_of_dimension = get_faces_of_dimension(simplicial_complex, dimension)
+    print(f"Conjunto de todas las caras de dimensión {dimension}:")
+    for face in faces_of_dimension:
+        print(face)
+
+    target_simplex_star = e01  # El simplex objetivo cuya estrella queremos calcular
+    star = get_star(simplicial_complex, target_simplex_star)
+
+    print("Simplex objetivo para la estrella:")
+    print(target_simplex_star)
+    print("Estrella del simplex objetivo:")
+    print(star)
+
+    target_simplex_link = e01  # El simplex objetivo cuyo link queremos calcular
+    link = get_link(simplicial_complex, target_simplex_link)
+
+    print("Simplex objetivo para el link:")
+    print(target_simplex_link)
+    print("Link del simplex objetivo:")
+    print(link)
+
+    euler = euler_characteristic(simplicial_complex)
+    print("Característica de Euler del complejo simplicial:", euler)
+
+    euler_alternative = euler_characteristic_alternative(simplicial_complex)
+    print("Característica de Euler (fórmula alternativa) del complejo simplicial:", euler_alternative)
+
+    num_components = num_connected_components(simplicial_complex)
+    print("Número de componentes conexas:", num_components)
+
+ 
+  

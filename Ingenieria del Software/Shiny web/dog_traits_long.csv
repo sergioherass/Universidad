@@ -1,0 +1,26 @@
+breed,trait,rating
+Retrievers (Labrador),Affectionate With Family,5
+French Bulldogs,Affectionate With Family,5
+German Shepherd Dogs,Affectionate With Family,5
+Retrievers (Golden),Affectionate With Family,5
+Bulldogs,Affectionate With Family,4
+Poodles,Affectionate With Family,5
+Beagles,Affectionate With Family,3
+Rottweilers,Affectionate With Family,5
+Retrievers (Labrador),Good With Young Children,5
+French Bulldogs,Good With Young Children,5
+German Shepherd Dogs,Good With Young Children,5
+Retrievers (Golden),Good With Young Children,5
+Bulldogs,Good With Young Children,3
+Poodles,Good With Young Children,5
+Beagles,Good With Young Children,5
+Rottweilers,Good With Young Children,3
+Retrievers (Labrador),Good With Other Dogs,5
+French Bulldogs,Good With Other Dogs,4
+German Shepherd Dogs,Good With Other Dogs,3
+Retrievers (Golden),Good With Other Dogs,5
+Bulldogs,Good With Other Dogs,3
+Poodles,Good With Other Dogs,3
+Beagles,Good With Other Dogs,5
+Rottweilers,Good With Other Dogs,3
+Retrievers (Labrador),Shedding Level,4

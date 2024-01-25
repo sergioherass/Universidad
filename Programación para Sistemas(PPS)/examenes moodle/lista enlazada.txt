@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+/* Solamente como ejemplo didáctico. No sería útil leer elemento a elemento */
+/* el objetivo es didáctico para entender estas estructuras dinámicas, por ese motivo es simple, pero no válido en la mayoría de las situaciones*/
+typedef struct nodo
+{
+	char dato;
+	struct nodo * enlace;
+} LISTA;
+
+int main(void)
+{
+	char elemento;
+	LISTA * l = NULL;
+
+	while ( (elemento = getchar() ) != EOF )
+	{
+		insertar(&l, elemento);
+	}
+	mostrar_lista(l);
+	exit(0);
+}
+void mostrar_lista(LISTA * p)
+{
+	while(p != NULL)
+	{
+		printf("%c",p->dato);
+		p = p->enlace;
+	}
+}
+void insertar(LISTA ** p, char elemento)
+{
+	LISTA *p1, *p2;
+	
+	p1 = *p;
+	if(p1 == NULL)
+	{
+		p1 = malloc(sizeof(LISTA));
+		if(p1 != NULL)
+		{
+			p1->dato = elemento;
+			p1->enlace = NULL;
+			*p = p1;
+		}
+	}
+	else
+	{
+		while(p1->enlace != NULL)
+			p1 = p1->enlace;
+		p2 = malloc(sizeof(LISTA));
+		if(p2 != NULL)
+		{
+			p2->dato = elemento;
+			p2->enlace = NULL;
+			p1->enlace = p2;
+		}
+	}
+}
+/*faltan prototipos, liberar memoria */
+/* Tal y como está se inserta por el final, insertar por el principio*/
+/*eliminar el primero */
+/*eliminar el último */
+/*Guardar en char ** línea a línea usando memoria dinámica*/

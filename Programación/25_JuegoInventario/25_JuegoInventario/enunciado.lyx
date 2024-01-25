@@ -1,0 +1,777 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass extarticle
+\begin_preamble
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Paquetes adicionales
+
+\usepackage{color}
+
+\usepackage{listings}
+
+%\usepackage{titlesec}
+
+\usepackage{titling} 
+
+\usepackage{fancyhdr}
+\end_preamble
+\use_default_options false
+\begin_modules
+customHeadersFooters
+InStar
+\end_modules
+\maintain_unincluded_children false
+\begin_forced_local_layout
+Format 66
+Style "In Preamble"
+	Category "FrontMatter"
+	Margin Static
+	LatexType Paragraph
+	InTitle 0
+	InPreamble 1
+	TocLevel -1000
+	ResumeCounter 0
+	StepMasterCounter 0
+	NeedProtect 0
+	KeepEmpty 0
+	NextNoIndent 0
+	CommandDepth 0
+	LatexName "dummy"
+	ItemCommand item
+	LabelType No_Label
+	EndLabelType No_Label
+	ParagraphGroup "0"
+	ParIndent MM
+	ParSkip 0.4
+	ItemSep 0
+	TopSep 0
+	BottomSep 0
+	LabelBottomSep 0
+	ParSep 0
+	NewLine 1
+	Align Block
+	AlignPossible Block, Center, Layout, Left, Right
+	FreeSpacing 0
+	PassThru 0
+	ParbreakIsNewline 0
+	RefPrefix OFF
+	HTMLLabelFirst 0
+	HTMLStyle
+div.standard {
+margin-bottom: 2ex;
+}
+	EndHTMLStyle
+	HTMLForceCSS 0
+	HTMLTitle 0
+	Spellcheck 1
+	ForceLocal 1
+End
+Style "In Title"
+	Category "FrontMatter"
+	Margin Static
+	LatexType Paragraph
+	InTitle 1
+	InPreamble 0
+	TocLevel -1000
+	ResumeCounter 0
+	StepMasterCounter 0
+	NeedProtect 0
+	KeepEmpty 0
+	NextNoIndent 0
+	CommandDepth 0
+	LatexName "dummy"
+	ItemCommand item
+	LabelType No_Label
+	EndLabelType No_Label
+	ParagraphGroup "0"
+	ParIndent MM
+	ParSkip 0.4
+	ItemSep 0
+	TopSep 0
+	BottomSep 0
+	LabelBottomSep 0
+	ParSep 0
+	NewLine 1
+	Align Block
+	AlignPossible Block, Center, Layout, Left, Right
+	FreeSpacing 0
+	PassThru 0
+	ParbreakIsNewline 0
+	RefPrefix OFF
+	HTMLLabelFirst 0
+	HTMLStyle
+div.standard {
+margin-bottom: 2ex;
+}
+	EndHTMLStyle
+	HTMLForceCSS 0
+	HTMLTitle 0
+	Spellcheck 1
+	ForceLocal 1
+End
+\end_forced_local_layout
+\language spanish
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format pdf2
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 11
+\spacing single
+\use_hyperref true
+\pdf_title "Programación en C"
+\pdf_author "Unidad Docente de Informática Industrial - ETSII UPM"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry true
+\use_package amsmath 0
+\use_package amssymb 0
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\justification true
+\use_refstyle 0
+\use_minted 0
+\branch SinIndice
+\selected 1
+\filename_suffix 0
+\color #faf0e6
+\end_branch
+\index Índice
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 2cm
+\rightmargin 1.5cm
+\bottommargin 2cm
+\headheight 0cm
+\headsep 1cm
+\footskip 0cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Left Header
+DLSIIS - ETSIINF - UPM
+\end_layout
+
+\begin_layout Right Header
+Programación 2.
+ GII.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+setlength{
+\backslash
+droptitle}{-5em} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+posttitle{
+\backslash
+par
+\backslash
+end{center}
+\backslash
+vspace{-5em}
+\backslash
+hspace{+2em}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+Un personaje y su inventario de objetos.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% Para poner la cabecera
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{fancy}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Introducción y objetivo
+\end_layout
+
+\begin_layout Standard
+Las colecciones acotadas de objetos de distinto tipo son muy frecuentes
+ en todo tipo de programas y sistemas.
+ Una aplicación de estas colecciones son las mochilas y objetos equipados
+ de los personajes de algunos videojuegos de tipo RPG o similares.
+ Básicamente, en estos juegos, el jugador recoge objetos por el mundo virtual
+ y los almacena en su mochila o los 
+\emph on
+equipa
+\emph default
+, es decir, se los pone para poderlos usar a través de la pulsación de una
+ letra del teclado o de un botón.
+ Desde el punto de vista de programación, una solución para implementar
+ esta funcionalidad consiste en guardar los objetos en dos colecciones acotadas
+ de objetos: una será la mochila y la otra el conjunto de objetos equipados.
+ 
+\end_layout
+
+\begin_layout Standard
+El objetivo de esta práctica es que el alumno se familiarice con la manipulación
+ de estas estructuras de datos, para ello deberá implementar las operaciones
+ necesarias para poder manipular los objetos del inventario de acuerdo con
+ las reglas que se describen en este enunciado.
+ Este objetivo se considera cumplido si las clases desarrolladas por el
+ alumno, junto con las adjuntas con este enunciado, logran mostrar el inventario
+ del personaje, con su mochila y objetos equipados y todo funciona de acuerdo
+ a lo previsto.
+ 
+\end_layout
+
+\begin_layout Standard
+No es necesario escribir el código fuente en un orden determinado, el alumno
+ puede escribir un pequeño esquema de las clases e ir completando cada una
+ de las funcionalidad en el orden que considere más adecuado, aunque es
+ conveniente escribirlas en el orden en que aparecen en este enunciado.
+ 
+\end_layout
+
+\begin_layout Section
+Descripción
+\end_layout
+
+\begin_layout Standard
+El personaje de nuestro particular módulo de videojuego se maneja a través
+ de una interfaz gráfica que debe compilar y arrancar sin problemas antes
+ de que el alumno escriba nada de código.
+ Al arrancar debe observarse que el personaje tiene un nombre (pendiente
+ de rellenar), un retrato (en azul) y 14 huecos entre mochila (
+\emph on
+\lang english
+backpack
+\emph default
+\lang spanish
+), 10 huecos, y equipados (
+\emph on
+\lang english
+equipped
+\emph default
+\lang spanish
+) otros 4.
+ En la parte inferior hay una zona con fondo negro donde se mostrarán mensajes
+ de texto.
+ 
+\end_layout
+
+\begin_layout Standard
+Tanto el retrato como cada hueco de objeto tienen un botón que se puede
+ pulsar para hacer una acción, en la implementación proporcionada al pulsar
+ los botones se puede ver un mensaje de texto con la información del hueco
+ que se ha pulsado.
+ Además, en cada hueco se muestra un texto que marca una zona de 
+\emph on
+\lang english
+
+\begin_inset Quotes eld
+\end_inset
+
+drag and drop
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+\lang spanish
+, es decir, pinchar y arrastrar, al pinchar en un hueco y, sin saltar, arrastrar
+ a otra zona se obtiene otro mensaje diferente con la información de los
+ huecos de origen y destino.
+ 
+\end_layout
+
+\begin_layout Subsection
+Estructura del código
+\end_layout
+
+\begin_layout Standard
+El código fuente está dividido en 2 paquetes: 
+\family typewriter
+\lang english
+model
+\family default
+\lang spanish
+ y 
+\family typewriter
+\lang english
+gui
+\family default
+\lang spanish
+ y una carpeta adicional: 
+\emph on
+\lang english
+assets
+\emph default
+\lang spanish
+ con iconos.
+ 
+\end_layout
+
+\begin_layout Standard
+La mayor parte del trabajo del alumno debe hacerse en el paquete 
+\family typewriter
+\lang english
+model
+\family default
+\lang spanish
+.
+ En este paquete deben añadirse las clases que el alumno decida implementar
+ para representar los objetos del inventario, las colecciones que guardan
+ esos objetos y, en la clase 
+\family typewriter
+\lang english
+Player
+\family default
+\lang spanish
+, implementar las operaciones que aparecen definidas mediante los métodos
+ marcados con TODO y que se llaman desde la interfaz gráfica.
+ 
+\end_layout
+
+\begin_layout Standard
+El paquete 
+\family typewriter
+\lang english
+gui
+\family default
+\lang spanish
+ contiene las clases que generan la interfaz gráfica de usuario, en general
+ el alumno no necesita tocar o leer estas clases.
+ 
+\end_layout
+
+\begin_layout Subsection
+Mensajes en la interfaz gráfica
+\end_layout
+
+\begin_layout Standard
+Como no tenemos el resto del videojuego, para simular que realizamos las
+ acciones asociadas a los objetos vamos a utilizar la zona de mensajes de
+ la interfaz gráfica de usuario
+\emph on
+.
+
+\emph default
+ En el paquete 
+\family typewriter
+gui
+\family default
+ tenemos una clase 
+\family typewriter
+\lang english
+Report
+\family default
+\lang spanish
+ que aparece gráficamente como una zona con fondo negro donde se pueden
+ mostrar mensajes escritos desde cualquier clase de las que implemente el
+ alumno, para ello será necesario usar el método de clase: 
+\end_layout
+
+\begin_layout LyX-Code
+public static void print(String msg);
+\end_layout
+
+\begin_layout Standard
+de dicha clase 
+\family typewriter
+gui.Report
+\family default
+, por ejemplo, la sentencia: 
+\end_layout
+
+\begin_layout LyX-Code
+gui.Report.print(
+\begin_inset Quotes qld
+\end_inset
+
+Begining program
+\begin_inset Quotes qld
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Standard
+mostrará 
+\emph on
+Begining program
+\emph default
+ en la zona de mensajes.
+ Cada mensaje está precedido por un índice creciente que se genera automáticamen
+te y que sirve para comprobar que cada mensaje se ha ido generando en el
+ orden esperado.
+ Esta zona solo guardará los últimos 
+\end_layout
+
+\begin_layout Quote
+En algunos apartados de este enunciado se dirá que se 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+debe mostrar un mensaje
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, esta es la forma de hacerlo.
+ 
+\end_layout
+
+\begin_layout Section
+Se pide
+\end_layout
+
+\begin_layout Standard
+Para que la interfaz gráfica de usuario, 
+\emph on
+GUI
+\emph default
+, muestre correctamente lo que se espera se tienen que tener en cuenta los
+ siguientes puntos:
+\end_layout
+
+\begin_layout Enumerate
+Se debe mostrar un nombre en la parte superior de la GUI.
+\end_layout
+
+\begin_layout Enumerate
+Al pulsar el icono con el retrato se debe alternar entre los distintos aspectos
+ del personaje.
+ Estos aspectos vienen dados por los valores de 
+\family typewriter
+\lang english
+enum PlayerAspect
+\family default
+\lang spanish
+.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Cuando se llame al método para cambiar entre aspectos, se debe pasar al
+ aspecto siguiente, cuando llega al último se debe volver a seleccionar
+ el primero.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Se recomienda implementar una clase 
+\family typewriter
+\lang english
+Item
+\family default
+\lang spanish
+ para representar los objetos de inventario y un constructor de la clase
+ 
+\family typewriter
+\lang english
+Player
+\family default
+\lang spanish
+ para generar un inventario inicial, el alumno es libre de elegir cómo quiere
+ hacerlo.
+ Este inventario inicial no se puede alterar, es decir, no están previstas
+ ni son necesarias las operaciones que permite recoger nuevos 
+\emph on
+\lang english
+items
+\emph default
+\lang spanish
+ o soltar los que se tienen.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Se supone que el personaje solo puede tener un máximo de 10 objetos en cualquier
+ momento.
+ Estos 10 objetos se pueden guardar entre la mochila (máximo 10) y equipados
+ (máximo 4).
+\end_layout
+
+\begin_layout Enumerate
+Se puede 
+\emph on
+activar
+\emph default
+ un objeto entre los equipados, el objeto a activar se indica mediante un
+ índice del 0 al 3 (inclusive) que se corresponde con los 4 huecos disponibles
+ para equipar objetos.
+ Si no existe el objeto correspondiente la activación no debe hacer nada,
+ pero se debe mostrar el mensaje: 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+No hay un objeto para activar
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ o un mensaje similar.
+ Al activar un objeto se debe mostrar un mensaje característico de ese objeto.
+ Por ejemplo: 
+\begin_inset Quotes eld
+\end_inset
+
+Usando llave
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Se puede mostrar una descripción de un objeto cuando está en la mochila
+ y se pulsa el botón correspondiente.
+ Por ejemplo: 
+\begin_inset Quotes eld
+\end_inset
+
+Una llave herrumbrosa
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Si no hay un objeto en ese hueco se debe mostrar un mensaje, por ejemplo:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Ese hueco está libre
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Se puede 
+\emph on
+mover
+\emph default
+ un objeto equipado a la mochila o viceversa.
+ Al hacerlo se libera el hueco de origen y se ocupa el hueco destino.
+ Si el hueco de origen está vacío debe mostrarse un mensaje y no hacer nada.
+ Si el hueco de destino está en la mochila, pero está ocupado debe buscarse
+ otro hueco y colocar el objeto en ese hueco.
+ Si el hueco de destino está en los objetos equipados debe mostrarse un
+ mensaje que diga que ya hay un objeto equipo y no hacer nada más.
+\end_layout
+
+\begin_layout Section
+Funcionalidades adicionales
+\end_layout
+
+\begin_layout Standard
+Este programa se puede completar con algunas funcionalidades, se invita
+ al alumno a que piense cómo y a intentarlo o bien que elija implementar
+ algunas de las que se sugieren a continuación:
+\end_layout
+
+\begin_layout Itemize
+Poner en los huecos texto (fácil) o iconos (más difícil) relacionados con
+ los objetos que se guarden.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Notas:
+\end_layout
+
+\begin_layout Itemize
+La GUI ya tiene previsto que se puede cambiar el texto de los botones mediante
+ el método 
+\family typewriter
+gui.CharacterWrapper.getText
+\family default
+.
+\end_layout
+
+\begin_layout Itemize
+Se puede modificar libremente la clase CharacterWrapper para lograr esta
+ funcionalidad.
+ En la propia gui se manejan iconos se puede consultar el código fuente
+ para ver cómo se hace.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Hacer que algunos objetos puedan estar activados o desactivados.
+ Para reflejar esto se puede usar el texto del ítem (fácil) o su color de
+ fondo (más difícil).
+ Se puede usar el método 
+\family typewriter
+gui.CharacterWrapper.getColor
+\family default
+.
+ Pero es necesario completar también el método 
+\family typewriter
+gui.ItemPanel.setColor
+\family default
+ para decidir cuál es el color que se modifica.
+ 
+\end_layout
+
+\begin_layout Itemize
+Hacer que las activaciones tengan 
+\begin_inset Quotes eld
+\end_inset
+
+un tiempo de enfriamiento
+\begin_inset Quotes erd
+\end_inset
+
+.
+ La gui tiene activado un temporizador que, básicamente, llama periódicamente
+ al método Player.tick.
+ El alumno puede utilizar el tiempo transcurrido para deshabilitar el uso
+ del objeto durante un cierto intervalo de tiempo.
+ 
+\end_layout
+
+\begin_layout Itemize
+[...]
+\end_layout
+
+\begin_layout Section
+Evaluación y calificación
+\end_layout
+
+\begin_layout Standard
+La forma de evaluar este trabajo va a reflejar que los apartados obligatorios
+ tienen cierta dificultad, pero siguen siendo obligatorios.
+ Por ello, no se podrá obtener un 5 como nota final del ejercicio sino que
+ pasaremos directamente del 4 al 6.
+ 
+\end_layout
+
+\begin_layout Itemize
+Las soluciones que realicen correctamente los puntos 1 y 2 obtendrán una
+ calificación de 2 puntos.
+ 
+\end_layout
+
+\begin_layout Itemize
+Las soluciones que realicen correctamente los puntos 3, 4 y 5 obtendrán
+ una calificación de 4 puntos.
+\end_layout
+
+\begin_layout Itemize
+Las soluciones que cumplan todos los puntos hasta el 7 obtendrán 6 puntos.
+ 
+\end_layout
+
+\begin_layout Itemize
+Las notas del 7 en adelante se obtendrán completando funcionalidades adicionales
+ y por 
+\begin_inset Quotes eld
+\end_inset
+
+buen
+\begin_inset Quotes erd
+\end_inset
+
+ estilo en la implementación de los puntos obligatorios.
+ 
+\end_layout
+
+\end_body
+\end_document

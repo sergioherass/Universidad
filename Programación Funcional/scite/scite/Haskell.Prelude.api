@@ -1,0 +1,268 @@
+!! (:: [a] -> Int -> a);List index (subscript) operator, starting from 0. It is an instance of the more general Data.List.genericIndex, which takes an index of any integral type.
+$! (:: (a -> b) -> a -> b);Strict (call-by-value) application, defined in terms of seq.
+$ (:: (a -> b) -> a -> b);Application operator. This operator is redundant, since ordinary application (f x) means the same as (f $ x). However, $ has low, right-associative binding precedence, so it sometimes allows parentheses to be omitted, for example:;     f $ g $ h x  =  f (g (h x));It is also useful in higher-order situations, such as map ($ 0) xs, or Data.List.zipWith ($) fs xs.
+&& (:: Bool -> Bool -> Bool);Boolean and.
+* (:: Num a => a -> a -> a);Product operator.
+** (:: Floating a => a -> a -> a);Power operator.
++ (:: Num a => a -> a -> a);Sum operator.
+++ (:: [a] -> [a] -> [a]);Append two lists, i.e., ; [x1, ..., xm] ++ [y1, ..., yn] == [x1, ..., xm, y1, ..., yn]; [x1, ..., xm] ++ [y1, ...] == [x1, ..., xm, y1, ...].
+- (:: Num a => a -> a -> a);Subtraction operator.
+-> (:: * -> * -> *);Functional type constructor.
+. (:: (a -> b) -> (c -> a) -> c -> b);Function composition.
+..
+/ (:: Fractional a => a -> a -> a);Fractional division.
+/= (:: Eq a => a -> a -> Bool);Inequality operator.
+: (:: a -> [a] -> [a]);Non empty list constructor. 
+< (:: Ord a => a -> a -> Bool);Less than operator.
+<-
+<= (:: Ord a => a -> a -> Bool);Less than or equal operator.
+=
+=<< (:: Monad m => (a -> m b) -> m a -> m b);Same as >>=, but with the arguments interchanged.
+== (:: Eq a => a -> a -> Bool);Equality operator.
+=>
+> (:: Ord a => a -> a -> Bool);Greater than operator.
+>= (:: Ord a => a -> a -> Bool);Greater than or equal operator.
+>> (:: Monad m => m a -> m b -> m b);Sequentially compose two actions, discarding any value produced by the first, like sequencing operators (such as the semicolon) in imperative languages.
+>>= (:: Monad m => m a -> (a -> m b) -> m b);Sequentially compose two actions, passing any value produced by the first as an argument to the second.
+@
+Bool (:: *);Boolean type:; data Bool = False | True
+Bounded (Bounded types class:);class Bounded a where;  minBound :: a;  maxBound :: a;;The Bounded class is used to name the upper and lower limits of a type. Ord is not a superclass of Bounded since types that are not totally ordered may also have upper and lower bounds.
+Char (:: *);Character type.
+Double (:: *);Double precision real number type.
+EQ (:: *);Equal value for Ordering type:; data Ordering = LT | EQ | GT
+Either (:: * -> * -> *);data Either a b = Left a | Right b;;The Either type represents values with two possibilities: a value of type Either a b is either Left a or Right b. The Either type is sometimes used to represent a value which is either correct or an error. By convention, the Left constructor is used to hold an error value and the Right constructor is used to hold a correct value (mnemonic: "right" also means "correct"). 
+Enum (Enumeration class:);class Enum a where;  succ :: a -> a;  pred :: a -> a;  toEnum :: Int -> a;  fromEnum :: a -> Int;  enumFrom :: a -> [a];  enumFromThen :: a -> a -> [a];  enumFromTo :: a -> a -> [a];  enumFromThenTo :: a -> a -> a -> [a];;Class Enum defines operations on sequentially ordered types. The enumFrom... methods are used in Haskell's translation of arithmetic sequences.
+Eq (Equality class:);class Eq a where;  (==) :: a -> a -> Bool;  (/=) :: a -> a -> Bool;;The Eq class defines equality (==) and inequality (/=). All the basic datatypes exported by the Prelude are instances of Eq, and Eq may be derived for any datatype whose constituents are also instances of Eq.
+False (:: Bool);False boolean value:; data Bool = False | True 
+FilePath (:: *);type FilePath = String;;File and directory names are values of type String, whose precise meaning is operating system dependent. Files can be opened, yielding a handle which can then be used to operate on the contents of that file.
+Float (:: *);Single precision real number type.
+Floating (class for trigonometric, hyperbolic and related functions:);class (Fractional a) => Floating a where;  pi :: a;  exp :: a -> a;  sqrt :: a -> a;  log :: a -> a;  (**) :: a -> a -> a;  logBase :: a -> a -> a;  sin :: a -> a;  tan :: a -> a;  cos :: a -> a;  asin :: a -> a;  atan :: a -> a;  acos :: a -> a;  sinh :: a -> a;  tanh :: a -> a;  cosh :: a -> a;  asinh :: a -> a;  atanh :: a -> a;  acosh :: a -> a
+Fractional (class for Fractional numbers, supporting real division:);class (Num a) => Fractional a where;  (/) :: a -> a -> a;  recip :: a -> a;  fromRational :: Rational -> a
+Functor (Functor class:);class Functor f where;  fmap :: (a -> b) -> f a -> f b;;The Functor class is used for types that can be mapped over. Instances of Functor should satisfy the following laws: ; fmap id  ==  id; fmap (f . g)  ==  fmap f . fmap g
+GT (:: Ordering);Greater than value for Ordering type:; data Ordering = LT | EQ | GT 
+IO (:: * -> *);Monadic Input/Output type.;;A value of type IO a is a computation which, when performed, does some I/O before returning a value of type a. There is really only one way to "perform" an I/O action: bind it to Main.main in your program. When your program is run, the I/O will be performed. It isn't possible to perform I/O from an arbitrary function, unless that function is itself in the IO monad and called at some point, directly or indirectly, from Main.main. IO is a monad, so IO actions can be combined using either the do-notation or the >> and >>= operations from the Monad class.
+IOError (:: *);The Haskell 98 type for exceptions in the IO monad.;;Any I/O operation may raise an IOError instead of returning a result. For a more general type of exception, including also those that arise in pure code, see Control.Exception.Exception. In Haskell 98, this is an opaque type.
+Int (:: *);Integer number type.
+Integer (:: *);Unlimited precision integer number type.
+Integral (class for Integral numbers, supporting integer division:);class (Real a, Enum a) => Integral a where;  quot :: a -> a -> a;  rem :: a -> a -> a;  div :: a -> a -> a;  mod :: a -> a -> a;  quotRem :: a -> a -> (a, a);  divMod :: a -> a -> (a, a);  toInteger :: a -> Integer
+Just (:: a -> Maybe a);Data constructor for Maybe type:; data Maybe a = Nothing | Just a
+LT (:: Ordering);Less than value for Ordering type:; data Ordering = LT | EQ | GT
+Left (:: a -> Either a b);Data constructor for Either type:; data Either a b = Left a | Right b
+Maybe (:: * -> *);data Maybe a = Nothing | Just a;;The Maybe type encapsulates an optional value. A value of type Maybe a either contains a value of type a (represented as Just a), or it is empty (represented as Nothing). Using Maybe is a good way to deal with errors or exceptional cases without resorting to drastic measures such as error.
+Monad (Monadic types class:);class Monad m where;  (>>=) :: m a -> (a -> m b) -> m b;  (>>) :: m a -> m b -> m b;  return :: a -> m a;  fail :: String -> m a;;The Monad class defines the basic operations over a monad, a concept from a branch of mathematics known as category theory. From the perspective of a Haskell programmer, however, it is best to think of a monad as an abstract datatype of actions. Haskell's do expressions provide a convenient syntax for writing monadic expressions.
+Nothing (:: Maybe a);Data constructor for Maybe type:; data Maybe a = Nothing | Just a
+Num (Basic numeric class:);class (Eq a, Show a) => Num a where;  (+) :: a -> a -> a;  (*) :: a -> a -> a;  (-) :: a -> a -> a;  negate :: a -> a;  abs :: a -> a;  signum :: a -> a;  fromInteger :: Integer -> a
+Ord (Ordered types class:);class (Eq a) => Ord a where;  compare :: a -> a -> Ordering;  (<) :: a -> a -> Bool;  (>=) :: a -> a -> Bool;  (>) :: a -> a -> Bool;  (<=) :: a -> a -> Bool;  max :: a -> a -> a;  min :: a -> a -> a;;The Ord class is used for totally ordered datatypes. Instances of Ord can be derived for any user-defined datatype whose constituent types are in Ord. The declared order of the constructors in the data declaration determines the ordering in derived Ord instances. The Ordering datatype allows a single comparison to determine the precise ordering of two objects.
+Ordering (:: *);Ordering type used for compare function in Ord class:; data Ordering = LT | EQ | GT 
+Rational (:: *);Arbitrary-precision rational numbers, represented as a ratio of two Integer values:;; type Rational = Ratio Integer;;A rational number may be constructed using the % operator.
+Read (class for parsing of Strings, producing values:); class Read a where;  readsPrec :: Int -> ReadS a;  readList :: ReadS [a]
+ReadS (:: * -> *);ReadS type:; type ReadS a = String -> [(a, String)];;A parser for a type a, represented as a function that takes a String and returns a list of possible parses as (a,String) pairs.
+Real (Real numbers class:);class (Num a, Ord a) => Real a where;  toRational :: a -> Rational
+RealFloat (class for efficient access to components of a floating-point number:);class (RealFrac a, Floating a) => RealFloat a where;  floatRadix :: a -> Integer;  floatDigits :: a -> Int;  floatRange :: a -> (Int, Int);  decodeFloat :: a -> (Integer, Int);  encodeFloat :: Integer -> Int -> a;  exponent :: a -> Int;  significand :: a -> a;  scaleFloat :: Int -> a -> a;  isNaN :: a -> Bool;  isInfinite :: a -> Bool;  isDenormalized :: a -> Bool;  isNegativeZero :: a -> Bool;  isIEEE :: a -> Bool;  atan2 :: a -> a -> a
+RealFrac (class for extracting components of fractions:);class (Real a, Fractional a) => RealFrac a where;  properFraction :: (Integral b) => a -> (b, a);  truncate :: (Integral b) => a -> b;  round :: (Integral b) => a -> b;  ceiling :: (Integral b) => a -> b;  floor :: (Integral b) => a -> b
+Right (:: b -> Either a b);Data constructor for Either type:; data Either a b = Left a | Right b
+Show (class for conversion of values to readable Strings:);class Show a where;  showsPrec :: Int -> a -> ShowS;  show :: a -> String;  showList :: [a] -> ShowS
+ShowS (:: *);type ShowS = String -> String;;The shows functions return a function that prepends the output String to an existing String. This allows constant-time concatenation of results using function composition.
+String (:: *);type String = [Char];;A String is a list of characters. String constants in Haskell are values of type String.
+True (:: Bool);True boolean value:; data Bool = False | True
+[] (:: [a]);Empty list constructor.
+^ (:: (Num a, Integral b) => a -> b -> a);Raise a number to a non-negative integral power.
+^^ (:: (Fractional a, Integral b) => a -> b -> a);Raise a number to an integral power.
+abs (:: Num a => a -> a);Absolute value.
+acos (:: Floating a => a -> a);Trigonometric arccosine function.
+acosh (:: Floating a => a -> a)
+all (:: (a -> Bool) -> [a] -> Bool);Applied to a predicate and a list, all determines if all elements of the list satisfy the predicate.
+and (:: [Bool] -> Bool);and returns the conjunction of a Boolean list. For the result to be True, the list must be finite. False, however, results from a False value at a finite index of a finite or infinite list.
+any (:: (a -> Bool) -> [a] -> Bool);Applied to a predicate and a list, any determines if any element of the list satisfies the predicate.
+appendFile (:: FilePath -> String -> IO ());The computation appendFile file str function appends the string str, to the file file.
+asTypeOf (:: a -> a -> a);asTypeOf is a type-restricted version of const. It is usually used as an infix operator, and its typing forces its first argument (which is usually overloaded) to have the same type as the second.
+asin (:: Floating a => a -> a);Trigonometric arcsine function.
+asinh (:: Floating a => a -> a)
+atan (:: Floating a => a -> a);Trigonometric arctangent function.
+atan2 (:: RealFloat a => a -> a -> a);A version of arctangent taking two real floating-point arguments. For real floating x and y, atan2 y x computes the angle (from the positive x-axis) of the vector from the origin to the point (x,y). atan2 y x returns a value in the range [-pi, pi]. It follows the Common Lisp semantics for the origin when signed zeroes are supported. atan2 y 1, with y in a type that is RealFloat, should return the same value as atan y. A default definition of atan2 is provided, but implementors can provide a more accurate implementation.
+atanh (:: Floating a => a -> a)
+break (:: (a -> Bool) -> [a] -> ([a],[a]));break, applied to a predicate p and a list xs, returns a tuple where first element is longest prefix (possibly empty) of xs of elements that do not satisfy p and second element is the remainder of the list:;; break (>3) [1,2,3,4,1,2,3,4] == ([1,2,3],[4,1,2,3,4]); break (<9) [1,2,3] == ([],[1,2,3]); break (>9) [1,2,3] == ([1,2,3],[]);;break p is equivalent to span (not . p).
+case
+catch (:: IO a -> (IOError -> IO a) -> IO a);The catch function establishes a handler that receives any IOError raised in the action protected by catch. An IOError is caught by the most recent handler established by catch. These handlers are not selective: all IOErrors are caught. Exception propagation must be explicitly provided in a handler by re-raising any unwanted exceptions. For example, in ; f = catch g (\e -> if IO.isEOFError e then return [] else ioError e);the function f returns [] when an end-of-file exception (cf. System.IO.Error.isEOFError) occurs in g. Otherwise, the exception is propagated to the next outer handler. When an exception propagates outside the main program, the Haskell system prints the associated IOError value and exits the program.
+ceiling (:: (RealFrac a, Integral b) => a -> b);ceiling x returns the least integer not less than x.
+class
+compare (:: Ord a => a -> a -> Ordering);compares two ordered values. Returns EQ if both are equal, LT if the first is less than the second or GT otherwise.
+concat (:: [[a]] -> [a]);Concatenate a list of lists.
+concatMap (:: (a -> [b]) -> [a] -> [b]);Map a function over a list and concatenate the results.
+const (:: a -> b -> a);Constant function:; const x y = x
+cos (:: Floating a => a -> a);Trigonometric cosine funtion.
+cosh (:: Floating a => a -> a)
+curry (:: ((a,b) -> c) -> a -> b -> c);curry converts an uncurried function to a curried function.
+cycle (:: [a] -> [a]);cycle ties a finite list into a circular one, or equivalently, the infinite repetition of the original list. It is the identity on infinite lists.
+data
+decodeFloat (:: RealFloat a => a -> (Integer,Int));The function decodeFloat applied to a real floating-point number returns the significand expressed as an Integer and an appropriately scaled exponent (an Int). If decodeFloat x yields (m,n), then x is equal in value to m*b^^n, where b is the floating-point radix, and furthermore, either m and n are both zero or else b^(d-1) <= m < b^d, where d is the value of floatDigits x. In particular, decodeFloat 0 = (0,0).
+default
+deriving
+div (:: Integral a => a -> a -> a);Integer division truncated toward negative infinity.
+divMod (:: Integral a => a -> a -> (a,a));Simultaneous div and mod.
+do
+drop (:: Int -> [a] -> [a]);drop n xs returns the suffix of xs after the first n elements, or [] if n > length xs:;; drop 6 "Hello World!" == "World!"; drop 3 [1,2,3,4,5] == [4,5]; drop 3 [1,2] == []; drop 3 [] == []; drop (-1) [1,2] == [1,2]; drop 0 [1,2] == [1,2];;It is an instance of the more general Data.List.genericDrop, in which n may be of any integral type.
+dropWhile (:: (a -> Bool) -> [a] -> [a]);dropWhile p xs returns the suffix remaining after takeWhile p xs:;; dropWhile (<3) [1,2,3,4,5,1,2,3] == [3,4,5,1,2,3]; dropWhile (<9) [1,2,3] == []; dropWhile (<0) [1,2,3] == [1,2,3]
+either (:: (a -> b) -> (c -> b) -> Either a c -> b);Case analysis for the Either type. If the value is Left a, apply the first function to a. If it is Right b, apply the second function to b.
+elem (:: Eq a => a -> [a] -> Bool);elem is the list membership predicate, usually written in infix form, e.g., x `elem` xs.
+else
+encodeFloat (:: RealFloat a => Integer -> Int -> a);encodeFloat performs the inverse of decodeFloat.
+enumFrom (:: Enum a => a -> [a]);Used in Haskell's translation of [n..] 	
+enumFromThen (:: Enum a => a -> a -> [a]);Used in Haskell's translation of [n,n'..]
+enumFromThenTo (:: Enum a => a -> a -> a -> [a]);Used in Haskell's translation of [n,n'..m]
+enumFromTo (:: Enum a => a -> a -> [a]);Used in Haskell's translation of [n..m]
+error (:: String -> a);error stops execution and displays an error message.
+even (:: Integral a => a -> Bool);True if number is even.
+exp (:: Floating a => a -> a);Exponential function.
+exponent (:: RealFloat a => a -> Int);The second component of decodeFloat.
+fail (:: Monad m => String -> m a);Fail with a message. This operation is not part of the mathematical definition of a monad, but is invoked on pattern-match failure in a do expression.
+filter (:: (a -> Bool) -> [a] -> [a]);filter, applied to a predicate and a list, returns the list of those elements that satisfy the predicate, i.e.,; filter p xs = [ x | x <- xs, p x]
+flip (:: (a -> b -> c) -> b -> a -> c);flip f takes its (first) two arguments in the reverse order of f.
+floatDigits (:: RealFloat a => a -> Int);A constant function, returning the number of digits of floatRadix in the significand.
+floatRadix (:: RealFloat a => a -> Integer);A constant function, returning the radix of the representation (often 2).
+floatRange (:: RealFloat a => a -> (Int,Int));A constant function, returning the lowest and highest values the exponent may assume.
+floor (:: (RealFrac a, Integral b) => a -> b);floor x returns the greatest integer not greater than x.
+fmap (:: Functor f => (a -> b) -> f a -> f b);fmap f applies function f to all elements in a structure, which must be a functor.
+foldl (:: (a -> b -> a) -> a -> [b] -> a);foldl, applied to a binary operator, a starting value (typically the left-identity of the operator), and a list, reduces the list using the binary operator, from left to right:;  foldl f z [x1, x2, ..., xn]; ==;  (...((z `f` x1) `f` x2) `f`...) `f` xn
+foldl1 (:: (a -> a -> a) -> [a] -> a);foldl1 is a variant of foldl that has no starting value argument, and thus must be applied to non-empty lists.
+foldr (:: (a -> b -> b) -> b -> [a] -> b);foldr, applied to a binary operator, a starting value (typically the right-identity of the operator), and a list, reduces the list using the binary operator, from right to left:;  foldr f z [x1, x2, ..., xn]; ==;  x1 `f` (x2 `f` ... (xn `f` z)...)
+foldr1 (:: (a -> a -> a) -> [a] -> a);foldr1 is a variant of foldr that has no starting value argument, and thus must be applied to non-empty lists.
+fromEnum (:: Enum a => a -> Int);Convert to an Int. It is implementation-dependent what fromEnum returns when applied to a value that is too large to fit in an Int.
+fromInteger (:: Num a => Integer -> a);Conversion from an Integer. An integer literal represents the application of the function fromInteger to the appropriate value of type Integer, so such literals have type (Num a) => a
+fromIntegral (:: (Integral a, Num b) => a -> b);General coercion from integral types.
+fromRational (:: Fractional a => Rational -> a);Conversion from a Rational (that is Ratio Integer). A floating literal stands for an application of fromRational to a value of type Rational, so such literals have type (Fractional a) => a
+fst (:: (a,b) -> a);Extract the first component of a pair.
+gcd (:: Integral a => a -> a -> a);gcd x y is the greatest (positive) integer that divides both x and y.
+getChar (:: IO Char);Read a character from the standard input device (same as hGetChar stdin).
+getContents (:: IO String);The getContents operation returns all user input as a single string, which is read lazily as it is needed (same as hGetContents stdin).
+getLine (:: IO String);Read a line from the standard input device (same as hGetLine stdin).
+head (:: [a] -> a);Extract the first element of a list, which must be non-empty.
+hidding
+id (:: a -> a);Identity function:; id x = x
+if
+import
+in
+infix
+infixl
+infixr
+init (:: [a] -> [a]);Return all the elements of a list except the last one. The list must be finite and non-empty.
+instance
+interact (:: (String -> String) -> IO ());The interact function takes a function of type String->String as its argument. The entire input from the standard input device is passed to this function as its argument, and the resulting string is output on the standard output device.
+ioError (:: IOError -> IO a);Raise an IOError in the IO monad.
+isDenormalized (:: RealFloat a => a -> Bool);True if the argument is too small to be represented in normalized format.
+isIEEE (:: RealFloat a => a -> Bool);True if the argument is an IEEE floating point number.
+isInfinite (:: RealFloat a => a -> Bool);True if the argument is an IEEE infinity or negative infinity.
+isNaN (:: RealFloat a => a -> Bool);True if the argument is an IEEE "not-a-number" (NaN) value.
+isNegativeZero (:: RealFloat a => a -> Bool);True if the argument is an IEEE negative zero.
+iterate (:: (a -> a) -> a -> [a]);iterate f x returns an infinite list of repeated applications of f to x:; iterate f x == [x, f x, f (f x), ...]
+last (:: [a] -> a);Extract the last element of a list, which must be finite and non-empty.
+lcm (:: Integral a => a -> a -> a);lcm x y is the smallest positive integer that both x and y divide.
+length (:: [a] -> Int);length returns the length of a finite list as an Int. It is an instance of the more general Data.List.genericLength, the result type of which may be any kind of number.
+let
+lex (:: ReadS String);The lex function reads a single lexeme from the input, discarding initial white space, and returning the characters that constitute the lexeme. If the input string contains only white space, lex returns a single successful `lexeme' consisting of the empty string. (Thus lex "" = [("","")].) If there is no legal lexeme at the beginning of the input string, lex fails (i.e. returns []).
+lines (:: String -> [String]);Breaks a string up into a list of strings at newline characters.
+log (:: Floating a => a -> a);Logarithmic function.
+logBase (:: Floating a => a -> a -> a);logBase b n is the logarithmic function in base b for n.
+lookup (:: Eq a => a -> [(a,b)] -> Maybe b);lookup key assocs looks up a key in an association list.
+map (:: (a -> b) -> [a] -> [b]);map f xs is the list obtained by applying f to each element of xs, i.e.,; map f [x1, x2, ...] == [f x1, f x2, ...]
+mapM (:: Monad m => (a -> m b) -> [a] -> m [b]);mapM f is equivalent to sequence . map f
+mapM_ (:: Monad m => (a -> m b) -> [a] -> m ());mapM_ f is equivalent to sequence_ . map f
+max (:: Ord a => a -> a -> a);Maximum of two values.
+maxBound (:: Bounded a => a);Maximal value for a bounded type.
+maximum (:: Ord a => [a] -> a);maximum returns the maximum value from a list, which must be non-empty, finite, and of an ordered type. It is a special case of maximumBy, which allows the programmer to supply their own comparison function.
+maybe (:: a -> (b -> a) -> Maybe b -> a);The maybe function takes a default value, a function, and a Maybe value. If the Maybe value is Nothing, the function returns the default value. Otherwise, it applies the function to the value inside the Just and returns the result.
+min (:: Ord a => a -> a -> a);Minimum of two values.
+minBound (:: Bounded a => a);Minimal value for a Bounded type.
+minimum (:: Ord a => [a] -> a);minimum returns the minimum value from a list, which must be non-empty, finite, and of an ordered type. It is a special case of minimumBy, which allows the programmer to supply their own comparison function.
+mod (:: Integral a => a -> a -> a);Integer modulus, satisfying; (x `div` y)*y + (x `mod` y) == x
+module
+negate (:: Num a => a -> a);Unary negation.
+newtype
+not (:: Bool -> Bool);Boolean negation.
+notElem (:: Eq a => a -> [a] -> Bool);notElem is the negation of elem.
+null (:: [a] -> Bool);Test whether a list is empty.
+odd (:: Integral a => a -> Bool);True if number is odd.
+of
+or (:: [Bool] -> Bool);or returns the disjunction of a Boolean list. For the result to be False, the list must be finite. True, however, results from a True value at a finite index of a finite or infinite list.
+otherwise (:: Bool);otherwise is defined as the value True. It helps to make guards more readable. eg.;;  f x | x < 0     = ...;      | otherwise = ...
+pi (:: Floating a => a);Approximation to the value of pi.
+pred (:: Enum a => a -> a);The predecessor of a value. For numeric types, pred subtracts 1.
+print (:: Show a => a -> IO ());The print function outputs a value of any printable type to the standard output device. Printable types are those that are instances of class Show. print converts values to strings for output using the show operation and adds a newline. For example, a program to print the first 20 integers and their powers of 2 could be written as:;; main = print ([(n, 2^n) | n <- [0..19]])
+product (:: Num a => [a] -> a);The product function computes the product of a finite list of numbers.
+properFraction (:: (RealFrac a, Integral b) => a -> (b,a));The function properFraction takes a real fractional number x and returns a pair (n,f) such that x = n+f, and:; n is an integral number with the same sign as x; and; f is a fraction with the same type and sign as x, and with absolute value less than 1.
+putChar (:: Char -> IO ());Write a character to the standard output device (same as hPutChar stdout).
+putStr (:: String -> IO ());Write a string to the standard output device (same as hPutStr stdout).
+putStrLn (:: String -> IO ());The same as putStr, but adds a newline character.
+qualified
+quot (:: Integral a => a -> a -> a);Integer division truncated toward zero.
+quotRem (:: Integral a => a -> a -> (a,a));Simultaneous quot and rem.
+read (:: Read a => String -> a);The read function reads input from a string, which must be completely consumed by the input process.
+readFile (:: FilePath -> IO String);The readFile function reads a file and returns the contents of the file as a string. The file is read lazily, on demand, as with getContents.
+readIO (:: Read a => String -> IO a);The readIO function is similar to read except that it signals parse failure to the IO monad instead of terminating the program.
+readList (:: Read a => ReadS [a]);The method readList is provided to allow the programmer to give a specialised way of parsing lists of values. For example, this is used by the predefined Read instance of the Char type, where values of type String should be are expected to use double quotes, rather than square brackets.
+readLn (:: Read a => IO a);The readLn function combines getLine and readIO.
+readParen (:: Bool -> ReadS a -> ReadS a);readParen True p parses what p parses, but surrounded with parentheses.;readParen False p parses what p parses, but optionally surrounded with parentheses.
+reads (:: Read a => ReadS a);Equivalent to readsPrec with a precedence of 0.
+readsPrec (:: Read a => Int -> ReadS a);attempts to parse a value from the front of the string, returning a list of (parsed value, remaining string) pairs. If there is no successful parse, the returned list is empty.;Derived instances of Read and Text.Show.Show satisfy the following: ; (x,"") is an element of (readsPrec d (Text.Show.showsPrec d x "")). ;That is, readsPrec parses the string produced by Text.Show.showsPrec, and delivers the value that Text.Show.showsPrec started with. 
+realToFrac (:: (Real a, Fractional b) => a -> b);General coercion to fractional types.
+recip (:: Fractional a => a -> a);Reciprocal fraction.
+rem (:: Integral a => a -> a -> a);Integer remainder, satisfying; (x `quot` y)*y + (x `rem` y) == x
+repeat (:: a -> [a]);repeat x is an infinite list, with x the value of every element.
+replicate (:: Int -> a -> [a]);replicate n x is a list of length n with x the value of every element. It is an instance of the more general Data.List.genericReplicate, in which n may be of any integral type.
+return (:: Monad m => a -> m a);Inject a value into the monadic type.
+reverse (:: [a] -> [a]);reverse xs returns the elements of xs in reverse order. xs must be finite.
+round (:: (RealFrac a, Integral b) => a -> b);round x returns the nearest integer to x. The even integer if x is equidistant between two integers.
+scaleFloat (:: RealFloat a => Int -> a -> a);Multiplies a floating-point number by an integer power of the radix.
+scanl (:: (a -> b -> a) -> a -> [b] -> [a]);scanl is similar to foldl, but returns a list of successive reduced values from the left:;  scanl f z [x1, x2, ...]; ==;  [z, z `f` x1, (z `f` x1) `f` x2, ...];;Note that last (scanl f z xs) == foldl f z xs
+scanl1 (:: (a -> a -> a) -> [a] -> [a]);scanl1 is a variant of scanl that has no starting value argument:;  scanl1 f [x1, x2, ...]; ==;  [x1, x1 `f` x2, ...]
+scanr (:: (a -> b -> b) -> b -> [a] -> [b]);scanr is the right-to-left dual of scanl. Note that head (scanr f z xs) == foldr f z xs
+scanr1 (:: (a -> a -> a) -> [a] -> [a]);scanr1 is a variant of scanr that has no starting value argument.
+seq (:: a -> b -> b);Evaluates its first argument to head normal form, and then returns its second argument as the result.
+sequence (:: Monad m => [m a] -> m [a]);Evaluate each action in the sequence from left to right, and collect the results.
+sequence_ (:: Monad m => [m a] -> m ());Evaluate each action in the sequence from left to right, and ignore the results.
+show (:: Show a => a -> String);A specialised variant of showsPrec, using precedence context zero, and returning an ordinary String.
+showChar (:: Char -> ShowS);Utility function converting a Char to a show function that simply prepends the character unchanged.
+showList (:: Show a => [a] -> ShowS);The method showList is provided to allow the programmer to give a specialised way of showing lists of values. For example, this is used by the predefined Show instance of the Char type, where values of type String should be shown in double quotes, rather than between square brackets.
+showParen (:: Bool -> ShowS -> ShowS);Utility function that surrounds the inner show function with parentheses when the Bool parameter is True.
+showString (:: String -> ShowS);Utility function converting a String to a show function that simply prepends the string unchanged.
+shows (:: Show a => a -> ShowS);Equivalent to showsPrec with a precedence of 0.
+showsPrec (:: Show a => Int -> a -> ShowS);Convert a value to a readable String. showsPrec should satisfy the law; showsPrec d x r ++ s == showsPrec d x (r ++ s)
+significand (:: RealFloat a => a -> a);The first component of decodeFloat, scaled to lie in the open interval (-1,1) .
+signum (:: Num a => a -> a);Sign of a number.
+sin (:: Floating a => a -> a);Trigonometric sine funtion.
+sinh (:: Floating a => a -> a)
+snd (:: (a,b) -> b);Extract the second component of a pair.
+span (:: (a -> Bool) -> [a] -> ([a],[a]));span, applied to a predicate p and a list xs, returns a tuple where first element is longest prefix (possibly empty) of xs of elements that satisfy p and second element is the remainder of the list:;; span (< 3) [1,2,3,4,1,2,3,4] == ([1,2],[3,4,1,2,3,4]); span (< 9) [1,2,3] == ([1,2,3],[]); span (< 0) [1,2,3] == ([],[1,2,3]);;span p xs is equivalent to (takeWhile p xs, dropWhile p xs) s
+splitAt (:: Int -> [a] -> ([a], [a]));splitAt n xs returns a tuple where first element is xs prefix of length n and second element is the remainder of the list:;; splitAt 6 "Hello World!" == ("Hello ","World!"); splitAt 3 [1,2,3,4,5] == ([1,2,3],[4,5]); splitAt 1 [1,2,3] == ([1],[2,3]); splitAt 3 [1,2,3] == ([1,2,3],[]); splitAt 4 [1,2,3] == ([1,2,3],[]); splitAt 0 [1,2,3] == ([],[1,2,3]); splitAt (-1) [1,2,3] == ([],[1,2,3]);;It is equivalent to (take n xs, drop n xs). splitAt is an instance of the more general Data.List.genericSplitAt, in which n may be of any integral type.
+sqrt (:: Floating a => a -> a);Square root for a floating number.
+subtract (:: Num a => a -> a -> a);The same as flip (-). Because - is treated specially in the Haskell grammar, (- e) is not a section, but an application of prefix negation. However, (subtract exp) is equivalent to the disallowed section.
+succ (:: Enum a => a -> a);The successor of a value. For numeric types, succ adds 1.
+sum (:: Num a => [a] -> a);The sum function computes the sum of a finite list of numbers.
+tail (:: [a] -> [a]);Extract the elements after the head of a list, which must be non-empty.
+take (:: Int -> [a] -> [a]);take n, applied to a list xs, returns the prefix of xs of length n, or xs itself if n > length xs:;; take 5 "Hello World!" == "Hello"; take 3 [1,2,3,4,5] == [1,2,3]; take 3 [1,2] == [1,2]; take 3 [] == []; take (-1) [1,2] == []; take 0 [1,2] == [];;It is an instance of the more general Data.List.genericTake, in which n may be of any integral type.
+takeWhile (:: (a -> Bool) -> [a] -> [a]);takeWhile, applied to a predicate p and a list xs, returns the longest prefix (possibly empty) of xs of elements that satisfy p:;; takeWhile (< 3) [1,2,3,4,1,2,3,4] == [1,2]; takeWhile (< 9) [1,2,3] == [1,2,3]; takeWhile (< 0) [1,2,3] == []
+tan (:: Floating a => a -> a);Trigonometric tangent function.
+tanh (:: Floating a => a -> a)
+then
+toEnum (:: Enum a => Int -> a);Convert from an Int.
+toInteger (:: Integral a => a -> Integer);Conversion to Integer.
+toRational (:: Real a => a -> Rational);The rational equivalent of its real argument with full precision.
+truncate (:: (RealFrac a, Integral b) => a -> b);truncate x returns the integer nearest x between zero and x.
+type
+uncurry (:: (a -> b -> c) -> (a,b) -> c);uncurry converts a curried function to a function on pairs.
+undefined (:: a);A special case of error. It is expected that compilers will recognize this and insert error messages which are more appropriate to the context in which undefined appears.
+unlines (:: [String] -> String);Joins lines, after appending a terminating newline to each.
+until (:: (a -> Bool) -> (a -> a) -> a -> a);until p f yields the result of applying f until p holds.
+unwords (:: [String] -> String);Joins words with separating spaces.
+unzip (:: [(a,b)] -> ([a],[b]));Transforms a list of pairs into a list of first components and a list of second components.
+unzip3 (:: [(a,b,c)] -> ([a],[b],[c]));Takes a list of triples and returns three lists.
+userError (:: String -> IOError);Construct an IOError value with a string describing the error. The fail method of the IO instance of the Monad class raises a userError.
+where
+words (:: String -> [String]);Breaks a string up into a list of words, which were delimited by white space.
+writeFile (:: FilePath -> String -> IO ());The computation writeFile file str function writes the string str, to the file file.
+zip (:: [a] -> [b] -> [(a,b)]);Takes two lists and returns a list of corresponding pairs.
+zip3 (:: [a] -> [b] -> [c] -> [(a,b,c)]);Takes three lists and returns a list of triples.
+zipWith (:: (a -> b -> c) -> [a] -> [b] -> [c]);Generalises zip by zipping with the function given as the first argument, instead of a tupling function.
+zipWith3 (:: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]);Takes a function which combines three elements, as well as three lists and returns a list of their point-wise combination.
+|
+|| (:: Bool -> Bool -> Bool);Boolean or.

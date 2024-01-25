@@ -1,0 +1,227 @@
+#include<stdio.h>
+#include<math.h>
+
+int main(int argc, char** args){
+   float a, b, c, disc, x1, x2, xi, xr;
+   printf("\n\t\tSolucion de una ecuacion de segundo grado");
+   printf("\n\t\t_________________________________________\n\n\n");
+   printf("\t\t\tEscribe el valor de a --> ");
+   scanf("%f", &a);
+   while(a==0){
+   printf("\t\tEl valor de a no puede ser 0 ingrese el valor de nuevo -->");
+   scanf("%f", &a);
+   }
+   printf("\t\t\tEscribe el valor de b --> ");
+   scanf("%f", &b);
+   printf("\t\t\tEscribe el valor de c --> ");
+   scanf("%f", &c);
+
+ disc=pow(b, 2.0)-4*a*c;
+   if(disc>0.0){
+       printf("\t\t\tLas dos raices son reales");
+       x1=((-b+sqrt(disc))/(2.0*a));
+       x2=((-b-sqrt(disc))/(2.0*a));
+       printf("\n\t\t\tx1=%.2f   x2=%.2f", x1, x2);
+   }
+   else{
+       if(disc==0.0){
+           x1=(-b)/(2.0*a);
+           printf("\n\t\t\tLa ecuacion solo tiene una raiz %.2f", x1);
+       }
+       else{
+           xr=(-b/(2.0*a));
+           xi=(sqrt(-disc)/(2.0*a));
+           printf("\n\t\tLa raiz real es %.2f y la imaginaria es %.2f", xr, xi);
+       }
+   }
+   printf("\n\n\t\t\t");
+}
+
+
+
+
+
+
+
+#include<stdio.h>
+#include<math.h>
+#include"ec2g.c"
+int main(){
+ double a,b,c;
+ double x1,x2;
+ printf("Introduzca el valor de a: ");
+ scanf("%d",&a);
+ printf("Introduzca el valor de b: ");
+ scanf("%d",&b);
+ printf("Introduzca el valor de c: ");
+ scanf("%d",&c);
+ int res= resolver(3,2,-1,&x1,&x2);
+
+
+
+ return 0;
+}
+
+
+
+
+
+
+ disc=pow(b, 2.0)-4*a*c;
+   if(a==0&&b==0){
+    printf("Caso 3: 0.000000, 0.000000\n");
+   }else if(a==0&&b!=0){
+    x1=(-c)/b;
+    x2=sqrt(-1.0);
+    printf("Caso 4 : ecuacion de segundo grado %.6f, %.6f ",x1,x2);
+
+    }else{
+     if(disc>=0.0){
+       printf("\t\t\tLas dos raices son reales");
+       x1=((-b+sqrt(disc))/(2.0*a));
+       x2=((-b-sqrt(disc))/(2.0*a));
+       printf("\n\t\t\t Caso 1: x1=%.6f,   x2=%.6f", x1, x2);
+     }
+     else{
+        if(disc==0.0){
+           x1=(-b)/(2.0*a);
+
+           printf("\n\t\t\tCaso 1 pero:La ecuacion solo tiene una raiz %.6f , %.6f", x1,x1);
+        }
+        else{
+           x1=(-b/(2.0*a));
+           x2=(sqrt(-disc)/(2.0*a));
+           printf("\n\t\tCaso 2:La raiz real es %.6f y la imaginaria es %.6f", x1, x2);
+        }
+    }
+   printf("\n\n\t\t\t");
+ }
+}
+
+
+BUENO
+
+#include<stdio.h>
+#include<math.h>
+
+int main(int argc, char** args){
+   float a, b, c, disc, x1, x2;
+
+   printf("\t\tIntroduzca el valor de a ");
+   scanf("%f", &a);
+   printf("\t\t\tIntroduzcael valor de b ");
+   scanf("%f", &b);
+   printf("\t\t\tIntroduzca el valor de c ");
+   scanf("%f", &c);
+
+   disc=pow(b, 2.0)-4*a*c;
+   if(a==0&&b==0){
+    printf("\t\t\tCaso 3: 0.000000, 0.000000\n");
+   }else if(a==0&&b!=0){
+    x1=(-c)/b;
+    x2=sqrt(-1.0);
+    printf("Caso 4 :  %.6f, %.6f ",x1,x2);
+
+    }else{
+     if(disc>=0.0){
+
+       x1=((-b+sqrt(disc))/(2.0*a));
+       x2=((-b-sqrt(disc))/(2.0*a));
+       printf("\n\t\t\t Caso 1: %.6f, %.6f", x1, x2);
+     }
+     else{
+         x1=(-b/(2.0*a));
+         x2=(sqrt(-disc)/(2.0*a));
+         if(x2<0){
+           x2=x2*(-1);
+         }
+         printf("\n\t\tCaso 2:  %.6f,  %.6f", x1, x2);
+     }
+    }
+   printf("\n\n\t\t\t");
+ return 0;
+}
+
+
+
+
+mi ec2g.c
+#include<stdio.h>
+#include<math.h>
+int main(){
+ double disc;
+ int resolver(double a, double b, double c, double px1, double px2){
+
+  disc =b*b-4*a*c;
+  printf("%f",disc);
+   if(disc>0){
+      printf("Las dos raices son reales");
+      px1=(-b+sqrt(disc))/(2*a);
+      px2=(-b-sqrt(disc))/(2*a);
+      printf("px1=%.2f\n",px1);
+      printf("px2=%.2f\n",px2);
+   }else{
+      if(disc==0){
+          px1=(-b)/(2*a);
+          px2=sqrt(-1);
+          printf("La ecuacion solo tiene una raiz %.2f",px1);
+      }else{
+         px1=-b/(2*a);
+         px2=sqrt(-disc)/(2*a);
+         printf("La raiz real es %.2f y la raiz imaginaria es %.2f ",px1,px2);
+      }
+    }
+    printf("\n");
+
+
+   return 0;
+ }
+return 0;
+}
+
+vaokey ec2g.c
+
+#include<stdio.h>
+#include<math.h>
+
+// int resolver(double a, double b, double c, double px1, double px2){
+ int resolver(){
+   float a, b, c, disc, x1, x2;
+
+   printf("\t\tIntroduzca el valor de a ");
+   scanf("%f", &a);
+   printf("\t\tIntroduzcael valor de b ");
+   scanf("%f", &b);
+   printf("\t\tIntroduzca el valor de c ");
+   scanf("%f", &c);
+
+   disc=pow(b, 2.0)-4*a*c;
+   if(a==0&&b==0){
+    printf("\t\tCaso 3: 0.000000, 0.000000\n");
+   }else if(a==0&&b!=0){
+    x1=(-c)/b;
+    x2=sqrt(-1.0);
+    printf("\t\tCaso 4 :  %.6f, %.6f ",x1,x2);
+
+    }else{
+     if(disc>=0.0){
+
+       x1=((-b+sqrt(disc))/(2.0*a));
+       x2=((-b-sqrt(disc))/(2.0*a));
+       printf("\n\t\t Caso 1: %.6f, %.6f", x1, x2);
+     }
+     else{
+         x1=(-b/(2.0*a));
+         x2=(sqrt(-disc)/(2.0*a));
+         if(x2<0){
+           x2=x2*(-1);
+         }
+         printf("\n\t\tCaso 2:  %.6f,  %.6f", x1, x2);
+     }
+    }
+
+
+
+   return 0;
+ }
+

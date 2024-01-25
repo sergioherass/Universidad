@@ -1,0 +1,52 @@
+El "corte verde", "corte rojo" y "corte blanco" son términos que se refieren a diferentes usos de la operación "corte" (cut) en Prolog. El corte, denotado como !, es una operación que se usa para controlar la forma en que Prolog realiza la búsqueda de soluciones.
+
+Corte verde (Green Cut):
+Un corte verde es cuando el corte no afecta la lógica del programa, sólo mejora la eficiencia. Es decir, si se elimina el corte, el programa seguirá funcionando correctamente, pero posiblemente más lento.
+prolog
+Copy code
+ordenado([]).
+ordenado([_]).
+ordenado([X,Y|T]):- X =< Y, ordenado([Y|T]).
+Aquí, se tiene un predicado que verifica si una lista está ordenada. Sin embargo, este predicado puede ser más eficiente si se detiene tan pronto como encuentra un par de elementos que no están en orden. Esto se puede hacer utilizando un corte verde.
+
+prolog
+Copy code
+ordenado([]).
+ordenado([_]).
+ordenado([X,Y|T]):- X > Y, !, fail.
+ordenado([_|T]):- ordenado(T).
+Corte rojo (Red Cut):
+Un corte rojo es cuando el corte afecta la lógica del programa. Si se elimina, el programa puede comportarse de manera diferente.
+prolog
+Copy code
+max(X, Y, X) :- X > Y, !.
+max(_, Y, Y).
+Este predicado determina el máximo de dos números. Si se elimina el corte, el predicado podría tener dos soluciones en el caso de que X sea igual a Y.
+
+Corte blanco (White Cut):
+Un corte blanco es cuando el corte está en una regla con un predicado que no tiene otras reglas. Este es el caso más seguro para usar un corte, ya que no puede afectar la lógica del programa.
+prolog
+Copy code
+factorial(0, 1) :- !.
+factorial(N, Result) :- 
+    N > 0,
+    N1 is N - 1,
+    factorial(N1, Result1),
+    Result is N * Result1.
+Aquí, el corte es un corte blanco, ya que está en la regla factorial(0, 1), que no tiene otras reglas. Sin embargo, este ejemplo también se puede considerar como un corte verde, ya que si se elimina, el programa seguirá funcionando correctamente, pero será menos eficiente, ya que Prolog intentará buscar soluciones adicionales después de encontrar la única solución correcta.
+
+Por último, cabe mencionar que aunque los cortes pueden ser útiles para aumentar la eficiencia, también pueden hacer que los programas de Prolog sean más difíciles de entender y depurar, ya que cambian el flujo normal de control. Por lo tanto, se recomienda utilizarlos con precaución.
+
+
+7.-¿Qué función tiene el ! en el siguiente predicado que obtiene el enésimo elemento de una lista?
+nth(N,List,Elem) :-
+integer(N),!,
+N<=1,
+nth_func(N,Lista,Elem).
+nth(N,List,Elem) :-
+var(N),!,
+find_nth(List,Elem,e,N).
+Corte verde, rojo, blanco.
+El corte verde se utiliza para eliminar opciones no deseadas dentro del predicado actual, el corte rojo tiene
+un efecto más fuerte y elimina elecciones en todo el árbol de llamadas, y el corte blanco se coloca
+implícitamente al final de cada cláusula para evitar retroceder en esa cláusula específica.

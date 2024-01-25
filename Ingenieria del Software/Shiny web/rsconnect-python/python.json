@@ -1,0 +1,11 @@
+{
+    "https://api.shinyapps.io": {
+        "server_url": "https://api.shinyapps.io",
+        "filename": "C:\\Users\\34656\\quality-assurance\\quality-assurance\\src\\main\\python",
+        "app_url": "https://skrm.shinyapps.io/testing/",
+        "app_id": 8618052,
+        "app_guid": null,
+        "title": "testing",
+        "app_mode": "python-shiny"
+    }
+}

@@ -1,0 +1,104 @@
+package clase3;
+
+import es.upm.babel.cclib.Semaphore;
+
+public class CC_04_MutexSem {
+
+	private static int N_THREADS = 3;
+	private static int N_PASOS = 1000000;
+	
+	// Nos creamos el semaforo
+	private static Semaphore s_inc = new Semaphore(1); // otra opcion seria aqui con 0
+	private static Semaphore s_dec = new Semaphore(0); // otra opcion seria aqui con 1
+	
+	/* 
+	 * Con un unico semaforo:
+	 * private static Semaphore s = new Semaphore(1); 
+	 * 
+	 */
+
+	static class Contador {
+		private volatile int n;
+		public Contador() {
+			this.n = 0;
+		}
+		public int valorContador() {
+			return this.n;
+		}
+		public void inc() {
+			this.n++;
+		}
+		public void dec() {
+			this.n--;
+		}	
+	}
+
+	static class Incrementador extends Thread {
+		private Contador cont;
+		public Incrementador(Contador c) {
+			this.cont = c;
+		}
+		public void run() {
+			// s.await();
+			s_inc.await();
+			for(int i=0; i<N_PASOS; i++) 
+				this.cont.inc();
+			s_dec.signal();
+			// s.signal();
+		}
+	}
+
+	static class Decrementador extends Thread {
+		private Contador cont;
+		public Decrementador(Contador c) {
+			this.cont = c;
+		}
+		public void run() {
+			// s.await();
+			s_dec.await();
+			for(int i=0; i<N_PASOS; i++) 
+				this.cont.dec();
+			s_inc.signal();
+			// s.signal();
+			
+		}
+	}
+
+	public static void main(String[] args) {
+
+		// Creacion del objeto compartido
+		Contador cont = new Contador();
+
+		// Creacion de los arrays que contendran los threads
+		Incrementador[] tInc = new Incrementador[N_THREADS];
+		Decrementador[] tDec = new Decrementador[N_THREADS];
+
+		// Creacion de los objetos threads
+		for(int i=0; i<N_THREADS; i++) {
+			tInc[i] = new Incrementador(cont);
+			tDec[i] = new Decrementador(cont);
+		}
+
+		// Lanzamiento de los threads
+		for(int i=0; i<N_THREADS; i++) {
+			tInc[i].start();
+			tDec[i].start();
+		}
+
+		// Espera hasta terminacion de los threads
+		try {
+			for(int i=0; i<N_THREADS; i++) {
+				tInc[i].join();
+				tDec[i].join();
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.exit(-1);
+		}
+
+		// Simplemente se muestra el valor final de la variable 
+		System.out.println(cont.valorContador());
+		System.exit(0);
+	}
+
+}

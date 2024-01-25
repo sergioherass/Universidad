@@ -1,0 +1,163 @@
+import itertools
+from collections import OrderedDict
+
+
+import numpy as np
+from scipy.spatial import Delaunay
+import math
+
+class SimplexComplex:
+    def __init__(self, simplices):
+        self.simplices = simplices
+        self.face_set = self.calculate_face_set()
+        self.simplices_values = {}  # Nuevo atributo para almacenar los valores flotantes asociados a los símplices
+        self.sorted_simplices = self.sort_simplices()
+
+    """def add_simplex(self, simplex, value=0.0):
+        if simplex not in self.simplices:
+            self.simplices.append(simplex)
+            self.simplices_values[simplex] = value  # Asociar el valor flotante al simplex
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()"""
+    def add_simplex(self, simplex, value=0.0):
+        if simplex not in self.simplices:
+            self.simplices.append(simplex)
+            self.simplices_values[simplex] = value  # Asociar el valor flotante al simplex
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()
+
+            # Actualizar umbrales en todas las caras del nuevo símplice
+            for face in self.calculate_face_set():
+                if face not in self.simplices_values:
+                    self.simplices_values[face] = value
+
+    def remove_simplex(self, simplex):
+        if simplex in self.simplices:
+            del self.simplices_values[simplex]  # Eliminar el valor flotante asociado al simplex
+            self.simplices.remove(simplex)
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()
+
+    def dimension(self):
+        if not self.simplices:
+            return -1
+        return max(len(simplex) - 1 for simplex in self.simplices)
+
+    def calculate_face_set(self):
+        all_faces = set()
+        for simplex in self.simplices:
+            for i in range(1, len(simplex) + 1):
+                for combo in itertools.combinations(simplex, i):
+                    all_faces.add(tuple(sorted(combo)))
+        return all_faces
+
+    def sort_simplices(self):
+        return sorted(self.simplices, key=lambda simplex: (self.get_value(simplex),len(simplex)-1, simplex))
+    def get_value(self, simplex):
+    # Esta función devuelve el valor flotante asociado al simplex.
+    # Puedes personalizarla según la lógica que necesites para obtener el valor.
+    # En este ejemplo, se asume que el valor está asociado directamente al simplex.
+        return self.simplices_values.get(simplex, 0.0)
+
+    def n_faces(self, target_dimension):
+        return set(face for face in self.face_set if len(face) == target_dimension + 1)
+
+    def st(self, simplex):
+        star = set()
+        star.add(simplex)
+        for k in range((len(simplex) - 1) + 1, self.dimension() + 1):
+            star.update(face for face in self.n_faces(k) if set(simplex).issubset(face))
+        return star
+
+    def Euler_characteristic(self):
+        n = self.dimension()
+        euler_sum = sum(((-1) ** k) * len(self.n_faces(k)) for k in range(n + 1))
+        return euler_sum
+
+    def closed_star(self, simplex):
+        # Calcula la estrella cerrada de la cara dada
+        star_closed_faces = self.st(simplex)
+
+        # Inicializa un nuevo complejo simplicial con las caras de la estrella cerrada
+        closed_star_complex = SimplexComplex(star_closed_faces)
+
+        # Devuelve las caras del nuevo complejo simplicial
+        return closed_star_complex.face_set
+
+    def lk(self, face):
+        # Calcula el link de la cara dada
+        link_faces = list(filter(lambda x: len(set(x).intersection(face)) == 0, self.closed_star(face)))
+
+        # Devuelve el link de la cara entre llaves
+        return "{" + ", ".join(map(str, link_faces)) + "}"
+
+    def connected_components(self):
+        visited = set()
+        components = []
+
+        for vertex in self.space():
+            if vertex not in visited:
+                component = self.dfs(vertex, visited)
+                components.append(component)
+
+        return len(components)
+
+    def dfs(self, vertex, visited):
+        component = set()
+        stack = [vertex]
+
+        while stack:
+            current_vertex = stack.pop()
+            if current_vertex not in visited:
+                visited.add(current_vertex)
+                component.add(current_vertex)
+                stack.extend(
+                    neighbor for neighbor in self.neighbors(current_vertex) if neighbor not in visited)
+
+        return component
+
+    def neighbors(self, vertex):
+        return set(simplex_vertex for simplex in self.simplices for simplex_vertex in simplex)
+
+    def space(self):
+        return set(vertex for simplex in self.simplices for vertex in simplex)
+
+    def insert(self, new_simplices, value=0.0):
+        for simplex in new_simplices:
+            self.add_simplex(simplex, value)
+
+    def filtration(self, threshold):
+        below_threshold_simplices = [simplex for simplex in self.simplices if self.get_value(simplex) <= threshold]
+        below_threshold_complex = SimplexComplex(below_threshold_simplices)
+        return below_threshold_complex
+
+    
+    def filtrationorder(self):
+        sorted_faces_with_values = sorted(self.simplices_values.items(), key=lambda item: (item[1], len(item[0])))
+        sorted_faces = [item[0] for item in sorted_faces_with_values]
+        return sorted_faces
+    
+    def threshold(self, face):
+        return self.simplices_values.get(face, 0.0)
+
+    
+    def __str__(self):
+        return str(self.sorted_simplices)
+
+# Ejemplo de uso
+sc = SimplexComplex([])
+sc.insert([(0,1)],1.0) 
+sc.insert([(1,2),(2,3),(2,4)],2.0) 
+sc.insert([(3,4)],3.0) 
+sc.insert([(2,3,4)],4.0)
+print("Complejo simplicial:", sc)
+print("Complejo simplicial ordenado por valor flotante:", sc.sorted_simplices)
+print("Todas las caras del Complejo simplicial:", sc.face_set)
+K1=sc.filtration(1.0)
+K2=sc.filtration(2.0) 
+K3=sc.filtration(3.0) 
+K4=sc.filtration(4.0)
+
+print("Umbrales después de la inserción:", sc.simplices_values)
+print("Valor asociado a la cara ", sc.threshold((3,)))
+print("Caras ordenadas por umbral y dimensión:", sc.filtrationorder())

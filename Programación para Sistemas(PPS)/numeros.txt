@@ -1,0 +1,17 @@
+
+  int num_filas1;
+  int num_col1;
+  int num_filas2;
+  int num_col2;
+  printf("Dime el numero de filas de la primera matriz:\n");
+  scanf("%d",&num_filas1);
+
+
+int matrix1[num_filas1][num_col1];
+
+  for(int i=0;i<num_filas1;i++){
+      for (int j=0;j<num_col1;j++){
+           printf("Ingresar dato en ( fila[%d]columnas[%d]):",i,j);
+           scanf("%d",&matrix1[i][j]);
+      }
+  }

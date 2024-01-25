@@ -1,0 +1,140 @@
+
+
+
+COMANDOS GESTION USUARIOS
+************************************************************************************************************
+
+USER1
+SELECT user,host,password from mysql.user 
+SELECT * from mysql.user 
+
+GRANT all on *.* to user1@'localhost' identified by 'user1' with grant option;
+SHOW GRANTS FOR user1@localhost;
+
+SELECT * from mysql.user; 
+select * from cdcol.cds;
+
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM user1@localhost;
+
+SHOW GRANTS FOR user1@localhost;
+
+SELECT * from mysql.user; 
+select * from cdcol.cds;
+
+DROP USER user1@localhost;
+SELECT * from mysql.user 
+
+***************************************************************************************************************
+NIVEL DE BD (USER2)
+
+
+GRANT all on cdcol.* to user2@'localhost' identified by 'user2';
+SHOW GRANTS FOR user2@localhost;
+
+select * from mysql.db;
+
+select * from cdcol.cds;
+
+select * from mysql.user; 
+(no funcionaria en el perfil)
+
+REVOKE all on cdcol.* FROM  user2@'localhost'; 
+SHOW GRANTS FOR user2@localhost;
+
+select * from cdcol.cds;
+
+
+DROP USER user2@localhost;
+SELECT * from mysql.user 
+
+
+********************************************************************************************************************
+
+NIVEL DE TABLA (USER3)
+
+GRANT all on cdcol.cds to user3@'localhost' identified by 'user3';
+SHOW GRANTS FOR user3@localhost;
+
+select * from mysql.tables_priv;
+
+select * from cdcol.cds;
+
+REVOKE all on cdcol.cds FROM  user3@'localhost';
+SHOW GRANTS FOR user3@localhost;
+
+select * from cdcol.cds;
+
+DROP USER user3@localhost;
+SELECT * from mysql.user 
+
+
+*********************************************************************************************************************
+
+NIVEL DE columna (USER4)
+
+
+GRANT INSERT(titel,interpret) on cdcol.cds to user4@'localhost' identified by 'user4';
+SHOW GRANTS FOR user4@localhost;
+
+INSERT INTO  cdcol.cds(titel,interpret,jahr) VALUES ('AMANECER','sHASA', 1980);
+
+12:32:49	INSERT INTO  cdcol.cds(titel,interpret,jahr) VALUES ('AMANECER','sHASA', 1980)	
+Error Code: 1143. INSERT command denied to user 'user3'@'localhost' for column 'jahr' in table 'cds'	0.000 sec
+
+
+INSERT INTO  cdcol.cds(titel,interpret) VALUES ('AMANECER','sHASA');
+
+
+REVOKE INSERT(titel,interpret) on cdcol.cds FROM  user4@'localhost';
+SHOW GRANTS FOR user4@localhost;
+
+INSERT INTO  cdcol.cds(titel,interpret) VALUES ('AMANECER','sHASA');
+
+DROP USER user4@localhost;
+SELECT * from mysql.user 
+
+
+************************************************************************************************************************
+NIVEL DE RUTINA   (USER5)
+
+
+Desde_ local host
+SHOW PROCEDURE STATUS like 'tabla_fecha';
+
+call TablasFecha3.tabla_fecha();
+
+
+CREATE USER user5@'localhost' identified by 'user5';
+SHOW GRANTS FOR user5@localhost;
+
+SELECT * FROM mysql.user
+
+
+Si ahora desde el user5 intentamos ejecutar el procedimiento no podre:
+
+call TablasFecha3.tabla_fecha();
+
+
+Si ahora damos permisos de ejecucion desde el localhost
+
+GRANT EXECUTE ON PROCEDURE TablasFecha3.tabla_fecha TO user5@'localhost';
+SHOW GRANTS FOR user5@localhost;
+
+select * from mysql.procs_priv;
+
+
+call TablasFecha3.tabla_fecha();
+
+Para revocar:
+REVOKE EXECUTE ON PROCEDURE TablasFecha3.tabla_fecha FROM user5@'localhost';
+SHOW GRANTS FOR user5@localhost;
+
+
+call TablasFecha3.tabla_fecha();
+
+
+DROP USER user5@localhost;
+SELECT * from mysql.user 
+
+**************************************************************************************
+

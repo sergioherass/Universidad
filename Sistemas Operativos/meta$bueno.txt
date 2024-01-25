@@ -1,0 +1,465 @@
+/*-
+ * main.c
+ * Minishell C source
+ * Shows how to use "obtain_order" input interface function.
+ *
+ * Copyright (c) 1993-2002-2019, Francisco Rosales <frosal@fi.upm.es>
+ * Todos los derechos reservados.
+ *
+ * Publicado bajo Licencia de Proyecto Educativo Práctico
+ * <http://laurel.datsi.fi.upm.es/~ssoo/LICENCIA/LPEP>
+ *
+ * Queda prohibida la difusión total o parcial por cualquier
+ * medio del material entregado al alumno para la realización
+ * de este proyecto o de cualquier material derivado de este,
+ * incluyendo la solución particular que desarrolle el alumno.
+ *
+ * DO NOT MODIFY ANYTHING OVER THIS LINE
+ * THIS FILE IS TO BE MODIFIED
+ */
+
+#include <stddef.h>			/* NULL */
+#include <stdio.h>			/* setbuf, printf */
+#include <stdlib.h>
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/times.h>
+#include <sys/wait.h>
+#include <time.h>
+#include <fcntl.h>
+
+extern int obtain_order();		/* See parser.y for description */
+
+int main(void)
+{
+	char ***argvv = NULL;
+	int argvc;
+	char **argv = NULL;
+	//int argc;
+	char *filev[3] = { NULL, NULL, NULL };
+	int bg;
+	int ret;
+	//int fdin;
+	int fdout;
+	//int fderr;
+	int tub[2];
+	int salida;
+    struct sigaction act;
+	struct sigaction act2;
+
+	setbuf(stdout, NULL);			/* Unbuffered */
+	setbuf(stdin, NULL);
+
+	act.sa_handler=SIG_IGN;
+	act.sa_flags=0;
+	sigaction(SIGINT,&act,NULL);
+	act2.sa_handler=SIG_IGN;
+    act2.sa_flags=0;
+	sigaction(SIGQUIT,&act2,NULL);
+
+	while (1) {
+		fprintf(stderr, "%s", "msh> ");	/* Prompt */
+		ret = obtain_order(&argvv, filev, &bg);
+		if (ret == 0) break;		/* EOF */
+		if (ret == -1) continue;	/* Syntax error */
+		argvc = ret - 1;		/* Line */
+		if (argvc == 0) continue;	/* Empty line */
+#if 1
+/*
+ * LAS LINEAS QUE A CONTINUACION SE PRESENTAN SON SOLO
+ * PARA DAR UNA IDEA DE COMO UTILIZAR LAS ESTRUCTURAS
+ * argvv Y filev. ESTAS LINEAS DEBERAN SER ELIMINADAS.
+ */
+
+		for (argvc = 0; (argv = argvv[argvc]); argvc++) { 
+
+			 if (argvv[argvc+1]!=NULL){
+				if(pipe(tub)<0){
+					perror("error al crear tuberia");
+					exit(1);
+				}
+			 }
+			 /*if(!bg){
+				act.sa_handler=SIG_DFL;
+                act.sa_flags=0;
+        		sigaction(SIGINT,&act,NULL);
+        		act2.sa_handler=SIG_DFL;
+        		act2.sa_flags=0;
+        		sigaction(SIGQUIT,&act2,NULL);
+			 }*/
+             if(bg){
+				act.sa_handler=SIG_IGN;
+                act.sa_flags=0;
+        		sigaction(SIGINT,&act,NULL);
+        		act2.sa_handler=SIG_IGN;
+        		act2.sa_flags=0;
+        		sigaction(SIGQUIT,&act2,NULL);
+
+			 } 
+
+
+
+			 if(strcmp(argvv[0][0],"cd")==0){
+				
+		        char *new_dir=argvv[0][1];
+		   		char actual_dir[PATH_MAX];
+		
+                if (filev[1]) {
+                    fdout=creat(filev[1],0666);
+                    if(fdout==-1){
+                        perror("Error al abrir el archivo de salida");
+                        exit(1);
+                    }
+				    if(new_dir==NULL){
+					    new_dir=getenv("HOME");
+					    if(new_dir==NULL){
+			  			     fprintf(stderr,"Error:No se pudo obtener el directorio HOME.\n");
+							 //exit(1);
+			  			     //continue;
+					    }
+		   		    }
+
+		  			if(chdir(new_dir)!=0){
+						perror("Error al cambiar de directorio");
+						//exit(1);
+		   			}
+		   			if(getcwd(actual_dir,sizeof(actual_dir))==NULL){
+						perror("Error al obtener el directorio actual");
+						//exit(1);
+		   			}else{
+						dprintf(fdout,"%s\n",actual_dir);
+						break;
+		   			}
+                    //dup2(fdout,1);
+					//dprintf(fdout,getcwd(actual_dir,sizeof(actual_dir)));
+                    close(fdout);
+                }
+				if (argvv[0][2]!=NULL){
+					fprintf(stderr,"Error: numero incorrecto de argumentos\n");
+					break;
+				}
+		   		if(new_dir==NULL){
+					new_dir=getenv("HOME");
+					if(new_dir==NULL){
+			  			fprintf(stderr,"Error:No se pudo obtener el directorio HOME.\n");
+						exit(1);
+			  			//continue;
+					}
+		   		}
+
+		  		if(chdir(new_dir)!=0){
+					perror("Error al cambiar de directorio");
+					//exit(1);
+					//continue;
+		   		}
+		   		if(getcwd(actual_dir,sizeof(actual_dir))==NULL){
+					perror("Error al obtener el directorio actual");
+					//exit(1);
+		   		}else{
+					printf("%s\n",actual_dir);
+					//break;
+		   		}
+
+
+			 } if(strcmp(argvv[0][0],"umask")==0){
+                   		   mode_t old_mask=umask(0);
+                   		   umask(old_mask); 
+                    if(argvv[0][2]!=NULL){
+                        fprintf(stderr,"umask: numero incorrecto de argumentos\n");
+						break;
+						//exit(1);
+                   	}
+                    if (filev[1]) {
+                        fdout=creat(filev[1],0666);
+                        if(fdout==-1){
+                            perror("error al abrir el archivo de salida");
+                            exit(1);
+                        }
+						if (argvv[0][1]==NULL){
+				   			//printf("%o\n",old_mask);
+							dprintf(fdout,"%d",old_mask);
+				   		}
+                   		if(argvv[0][1]!=NULL){
+                      		char *endptr;
+                      		long new_mask=strtol(argv[1],&endptr,8);
+                      		if(*endptr=='\0'){
+                         		umask((mode_t)new_mask);
+                     		}else{
+                        		fprintf(stderr,"umask:valor octal invalido: %s\n",argv[1]);
+								//exit(1);
+                      		}
+                   	    } 
+				   		/*if(argvv[0][2]!=NULL){
+                          	fprintf(stderr,"umask: mayor numero de argumentos\n");
+							break;
+							//exit(1);
+                   		}*/
+
+                   //continue;
+                    //dup2(fdout,1);
+                    close(fdout);
+					break;
+                 }
+                                        
+				   if (argvv[0][1]==NULL){
+				   	printf("%o\n",old_mask);
+				   }
+                   if(argvv[0][1]!=NULL){
+                      			char *endptr;
+                      			long new_mask=strtol(argv[1],&endptr,8);
+                      			if(*endptr=='\0'){
+                         			umask((mode_t)new_mask);
+                     			}else{
+                        			fprintf(stderr,"umask:valor octal invalido: %s\n",argv[1]);
+									//exit(1);
+                      			}
+                   	} 
+				   /*if(argvv[0][2]!=NULL){
+                        fprintf(stderr,"umask: numero incorrecto de argumentos\n");
+						break;
+						//exit(1);
+                   	}*/
+
+                   continue;
+                }
+				if (strcmp(argv[0], "time") == 0) {
+					struct tms tmsbuf;
+                    clock_t start = times(&tmsbuf);
+                    //clock_t end = times(&tmsbuf);
+    				if (argvv[0][1]==NULL) {
+						if (filev[1]) {
+								fdout=creat(filev[1],0666);
+									if(fdout==-1){
+										perror("error al abrir el archivo de salida");
+										exit(1);
+									}
+									//dup2(fdout,1);
+									//int status;
+            						//waitpid(pid, &status, 0);
+            						clock_t end = times(&tmsbuf);
+
+            						long ticks_per_second = sysconf(_SC_CLK_TCK);
+                    				double user_time = (double)tmsbuf.tms_cutime / ticks_per_second;
+                    				double system_time = (double)tmsbuf.tms_cstime / ticks_per_second;
+                    				double real_time = (double)(end - start) / ticks_per_second;
+
+                    				dprintf(fdout,"%d.%03du %d.%03ds %d.%03dr\n",
+                    				(int)user_time, (int)(user_time * 1000) % 1000,
+                    				(int)system_time, (int)(system_time * 1000) % 1000,
+                    				(int)real_time, (int)(real_time * 1000) % 1000);
+
+									close(fdout);
+									break;
+							}else{
+        		    			struct tms tmsbuf;
+                    			clock_t start = times(&tmsbuf);
+                    			clock_t end = times(&tmsbuf);
+
+       			    			long ticks_per_second = sysconf(_SC_CLK_TCK);
+                    			double user_time = (double)tmsbuf.tms_utime / ticks_per_second;
+                    			double system_time = (double)tmsbuf.tms_stime / ticks_per_second;
+                    			double real_time = (double)(end - start) / ticks_per_second;
+
+                    			printf("%d.%03du %d.%03ds %d.%03dr\n",
+                    			(int)user_time, (int)(user_time * 1000) % 1000,
+                    			(int)system_time, (int)(system_time * 1000) % 1000,
+                    			(int)real_time, (int)(real_time * 1000) % 1000);
+							}
+
+    				} else {
+                  		pid_t pid;
+        	  	  		struct tms tmsbuf;
+                  		clock_t end;
+
+                  		clock_t start = times(&tmsbuf);
+                  		pid = fork();
+
+                  		if (pid == 0) {
+
+                        	if (execvp(argv[1], &argv[1]) == -1) {
+                			perror("Error al ejecutar el comando");
+                			exit(1);
+
+            				}
+        	  	  		} else if (pid > 0) {
+							if (filev[1]) {
+								fdout=creat(filev[1],0666);
+									if(fdout==-1){
+										perror("error al abrir el archivo de salida");
+										exit(1);
+									}
+									//dup2(fdout,1);
+									int status;
+            						waitpid(pid, &status, 0);
+            						end = times(&tmsbuf);
+
+            						long ticks_per_second = sysconf(_SC_CLK_TCK);
+                    				double user_time = (double)tmsbuf.tms_cutime / ticks_per_second;
+                    				double system_time = (double)tmsbuf.tms_cstime / ticks_per_second;
+                    				double real_time = (double)(end - start) / ticks_per_second;
+
+                    				dprintf(fdout,"%d.%03du %d.%03ds %d.%03dr\n",
+                    				(int)user_time, (int)(user_time * 1000) % 1000,
+                    				(int)system_time, (int)(system_time * 1000) % 1000,
+                    				(int)real_time, (int)(real_time * 1000) % 1000);
+
+									close(fdout);
+									break;
+							}else{
+                   				int status;
+            					waitpid(pid, &status, 0);
+            					end = times(&tmsbuf);
+
+            					long ticks_per_second = sysconf(_SC_CLK_TCK);
+                    			double user_time = (double)tmsbuf.tms_cutime / ticks_per_second;
+                    			double system_time = (double)tmsbuf.tms_cstime / ticks_per_second;
+                    			double real_time = (double)(end - start) / ticks_per_second;
+
+                    			printf("%d.%03du %d.%03ds %d.%03dr\n",
+                    			(int)user_time, (int)(user_time * 1000) % 1000,
+                    			(int)system_time, (int)(system_time * 1000) % 1000,
+                    			(int)real_time, (int)(real_time * 1000) % 1000);
+							}
+
+        	     		 } else {
+
+            					perror("Error al crear el proceso hijo");
+								exit(1);
+        	     		 }
+						
+    		 		}
+			 } if((strcmp(argv[0], "cd") != 0) && (strcmp(argv[0], "umask") != 0) && (strcmp(argv[0], "time") != 0) && (strcmp(argv[0], "read") != 0)){
+
+				pid_t pid=fork();
+				if (pid<0){
+					perror("fork");
+					exit (1);
+				}
+				else if (pid == 0){
+					if (filev[0]) {
+						int fdin=open(filev[0],O_RDONLY);
+						if(fdin==-1){
+							perror("error al abrir el archivo de entrada");
+							exit(1);
+						}
+						dup2(fdin,0);
+						close(fdin);
+					}
+					if (filev[1]) {
+						int fdout=creat(filev[1],0666);
+						if(fdout==-1){
+							perror("error al abrir el archivo de salida");
+							exit(1);
+						}
+						dup2(fdout,1);
+						close(fdout);
+					}
+					if (filev[2]){
+						int fderr=creat(filev[2],0666);
+						if(fderr==-1){
+							perror("error al abrir el archivo de error");
+							exit(1);
+						}
+						dup2(fderr,2);
+						close(fderr);
+					}
+					if(!bg){
+						act.sa_handler=SIG_DFL;
+                		act.sa_flags=0;
+        				sigaction(SIGINT,&act,NULL);
+        				act2.sa_handler=SIG_DFL;
+        				act2.sa_flags=0;
+        				sigaction(SIGQUIT,&act2,NULL);
+			 		}
+					if (bg) printf("&\n");
+					if(argvc>0){
+
+                        dup2(salida,0);
+                        close(salida);//si pongo salida igual 
+                        //close(tub[1]);
+                    }
+
+					if (argvv[argvc+1]!=NULL){
+						//close(tub[0]);
+						dup2(tub[1],1);
+						close(tub[1]);
+					}
+
+					if(strcmp(argvv[0][0],"echo")==0){
+						if(argvv[0][1]!=NULL){	
+							int i=0;
+							//printf("%s",argvv[0][1]);
+							char *output=argvv[0][1];
+							char *username=(char *)malloc(128 * sizeof(char));
+							//printf("%s",output);
+
+							
+							while(output[i] != '\0'){
+								
+								//printf("hola");
+								if (output[0]=='$'){
+									//i++;
+									int j = 0;
+									while (output[i] != '\0' && sscanf(&output[i], "%[_a-zA-Z0-9]", &username[j])) {
+										if(strcmp(username,"HOME")==0){
+											//username=getenv(username);
+											char *dir= getenv(username);
+											printf("%s\n",dir);break;
+										}
+										j++;
+										i++;
+									}
+									//printf("%s\n",output);
+									//break;
+								}else{
+									//printf("%s\n",output);
+									execvp(argv[0],argv);
+									perror("exec");
+									exit (1);
+									break;
+								}
+								i++;
+								//printf("HOLA");
+							}
+						}else{
+							break;
+						}
+						break;
+					}
+					execvp(argv[0],argv);
+					perror("exec");
+					exit (1);
+
+				}else{
+					if(argvc>0){
+                        close(salida);
+					}
+					if (argvv[argvc+1]!=NULL){
+						salida=tub[0];
+						close(tub[1]);
+                                               // salida=tub[0];
+
+					}
+					if(!bg){
+						int status;
+						if (argvv[argvc+1]==NULL){
+						   waitpid(pid,&status,0);
+						}
+					}
+				}
+
+			  } 
+
+		}
+
+/*
+ * FIN DE LA PARTE A ELIMINAR
+ */
+#endif
+	}
+	exit(0);
+	return 0;
+}

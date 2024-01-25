@@ -1,0 +1,87 @@
+
+**********CERTIFICADO CA*******************************************************************************************************
+
+genrsa -out CAClavePrivada.pem 4096
+
+req -new -x509 -days 3650 -key CAClavePrivada.pem -out CACertificado.pem
+
+x509 –inform PEM –in CACertificado.pem –outform DER –out CACertificado.crt
+
+
+**********CERTIFICADO SERVIDOR*************************************************************************************************
+
+
+genrsa -out SR_ClavePrivada.pem 1024
+
+req –new -key SR_ClavePrivada.pem -out SR_Peticion.csr
+
+x509 -req -days 3650 -in SR_Peticion.csr -CA CACertificado.pem -CAkey CAClavePrivada.pem -set_serial 01 -out SR_Certificado.pem
+
+x509 –inform PEM –in SR_Certificado.pem –outform DER –out SR_Certificado.crt
+
+pkcs12 -export -in SR_Certificado.pem -inkey SR_ClavePrivada.pem -out SR_Certificado.p12
+
+
+************CERTIFICADO CLIENTE*********************************************************************************************
+
+
+genrsa -out CL_ClavePrivada.pem 1024
+
+req –new -key CL_ClavePrivada.pem -out CL_Peticion.csr
+
+x509 -req -days 3650 -in CL_Peticion.csr -CA CACertificado.pem -CAkey CAClavePrivada.pem -set_serial 02 -out CL_Certificado.pem
+
+x509 –inform PEM –in CL_Certificado.pem –outform DER –out CL_Certificado.crt
+
+pkcs12 -export -in CL_Certificado.pem -inkey CL_ClavePrivada.pem -out CL_Certificado.p12
+
+*****************************************************************************************************************************
+
+Prueba "Have_SSL":
+
+mysqld --ssl 
+
+mysql -u root
+
+show variables like "%ssl%";
+
+******************************************************************************************************************************
+
+Configuracion Manual SSL:
+
+
+Arranque servidor
+mysqld --ssl  --ssl-ca=CACertificado.pem --ssl-cert=SR_Certificado.pem --ssl-key=SR_ClavePrivada.pem
+
+
+
+Arranque cliente
+mysql -u root --ssl-ca=CACertificado.pem
+
+
+show variables like "%ssl%";
+
+
+*******************************************************************************************************************************
+
+Configuracion Automática SSL:
+
+ssl
+ssl-ca = "C:/xampp/mysql/CONFIGURACION_MYSQL_SSL/SERVER/CACertificado.pem"
+ssl-cert = "C:/xampp/mysql/CONFIGURACION_MYSQL_SSL/SERVER/SR_Certificado.pem"
+ssl-key = "C:/xampp/mysql/CONFIGURACION_MYSQL_SSL/SERVER/SR_ClavePrivada.pem"
+ssl-capath = "C:/xampp/mysql/CONFIGURACION_MYSQL_SSL/SERVER"
+
+SHOW STATUS LIKE "%ssl%";
+
+
+********************************************************************************************************************************
+
+
+
+
+
+
+
+
+

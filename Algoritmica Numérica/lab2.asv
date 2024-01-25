@@ -1,0 +1,10 @@
+clear
+
+x=0.1;
+xs=single(x);
+
+%apartado a)
+
+whos x xs
+
+% Una 

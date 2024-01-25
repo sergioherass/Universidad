@@ -1,0 +1,286 @@
+import itertools
+from collections import OrderedDict
+
+
+import numpy as np
+from scipy.spatial import Delaunay,Voronoi, voronoi_plot_2d
+import math
+
+import matplotlib.pyplot as plt 
+import matplotlib.colors 
+
+class SimplexComplex:
+    def __init__(self, simplices):
+        self.simplices = list(simplices)
+        self.face_set = self.calculate_face_set()
+        self.simplices_values = {}  # Nuevo atributo para almacenar los valores flotantes asociados a los símplices
+        self.sorted_simplices = self.sort_simplices()
+    """"
+    def add_simplex(self, simplex, value=0.0):
+        if simplex not in self.simplices:
+            self.simplices.append(simplex)
+            self.simplices_values[simplex] = value  # Asociar el valor flotante al simplex
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()
+
+            # Actualizar umbrales en todas las caras del nuevo símplice
+            for face in self.calculate_face_set():
+                if face not in self.simplices_values:
+                    self.simplices_values[face] = value """
+    def add_simplex(self, simplex, value=0.0):
+        simplex = tuple(simplex)  # Convertir el conjunto a una tupla
+        if simplex not in self.simplices:
+            self.simplices.append(simplex)
+            self.simplices_values[simplex] = value  # Asociar el valor flotante al simplex
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()
+
+        # Actualizar umbrales en todas las caras del nuevo símplice
+        for face in self.calculate_face_set():
+            if face not in self.simplices_values:
+                self.simplices_values[face] = value
+
+
+    def remove_simplex(self, simplex):
+        if simplex in self.simplices:
+            del self.simplices_values[simplex]  # Eliminar el valor flotante asociado al simplex
+            self.simplices.remove(simplex)
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()
+
+    def dimension(self):
+        if not self.simplices:
+            return -1
+        return max(len(simplex) - 1 for simplex in self.simplices)
+
+    def calculate_face_set(self):
+        all_faces = set()
+        for simplex in self.simplices:
+            for i in range(1, len(simplex) + 1):
+                for combo in itertools.combinations(simplex, i):
+                    all_faces.add(tuple(sorted(combo)))
+        return all_faces
+
+    def sort_simplices(self):
+        return sorted(self.simplices, key=lambda simplex: (self.get_value(simplex),len(simplex)-1, simplex))
+    def get_value(self, simplex):
+    # Esta función devuelve el valor flotante asociado al simplex.
+    # Puedes personalizarla según la lógica que necesites para obtener el valor.
+    # En este ejemplo, se asume que el valor está asociado directamente al simplex.
+        return self.simplices_values.get(simplex, 0.0)
+
+    def n_faces(self, target_dimension):
+        return set(face for face in self.face_set if len(face) == target_dimension + 1)
+
+    def st(self, simplex):
+        star = set()
+        star.add(simplex)
+        for k in range((len(simplex) - 1) + 1, self.dimension() + 1):
+            star.update(face for face in self.n_faces(k) if set(simplex).issubset(face))
+        return star
+
+    def Euler_characteristic(self):
+        n = self.dimension()
+        euler_sum = sum(((-1) ** k) * len(self.n_faces(k)) for k in range(n + 1))
+        return euler_sum
+
+    def closed_star(self, simplex):
+        # Calcula la estrella cerrada de la cara dada
+        star_closed_faces = self.st(simplex)
+
+        # Inicializa un nuevo complejo simplicial con las caras de la estrella cerrada
+        closed_star_complex = SimplexComplex(star_closed_faces)
+
+        # Devuelve las caras del nuevo complejo simplicial
+        return closed_star_complex.face_set
+
+    def lk(self, face):
+        # Calcula el link de la cara dada
+        link_faces = list(filter(lambda x: len(set(x).intersection(face)) == 0, self.closed_star(face)))
+
+        # Devuelve el link de la cara entre llaves
+        return "{" + ", ".join(map(str, link_faces)) + "}"
+
+    def connected_components(self):
+        visited = set()
+        components = []
+
+        for vertex in self.space():
+            if vertex not in visited:
+                component = self.dfs(vertex, visited)
+                components.append(component)
+
+        return len(components)
+
+    def dfs(self, vertex, visited):
+        component = set()
+        stack = [vertex]
+
+        while stack:
+            current_vertex = stack.pop()
+            if current_vertex not in visited:
+                visited.add(current_vertex)
+                component.add(current_vertex)
+                stack.extend(
+                    neighbor for neighbor in self.neighbors(current_vertex) if neighbor not in visited)
+
+        return component
+
+    def neighbors(self, vertex):
+        return set(simplex_vertex for simplex in self.simplices for simplex_vertex in simplex)
+
+    def space(self):
+        return set(vertex for simplex in self.simplices for vertex in simplex)
+
+    def insert(self, new_simplices, value=0.0):
+        for simplex in new_simplices:
+            self.add_simplex(simplex, value)
+
+    def filtration(self, threshold):
+        below_threshold_simplices = [simplex for simplex in self.simplices if self.get_value(simplex) <= threshold]
+        below_threshold_complex = SimplexComplex(below_threshold_simplices)
+        return below_threshold_complex
+
+    
+    def filtrationorder(self):
+        sorted_faces_with_values = sorted(self.simplices_values.items(), key=lambda item: (item[1], len(item[0])))
+        sorted_faces = [item[0] for item in sorted_faces_with_values]
+        return sorted_faces
+    
+    def threshold(self, face):
+        return self.simplices_values.get(face, 0.0)
+
+    def thresholdvalues(self):
+        all_thresholds = set(value for value in self.simplices_values.values())
+        sorted_thresholds = sorted(all_thresholds)
+        return sorted_thresholds
+    
+    def get_2D_simplices(simplicial_complex):
+        return [simplex for simplex in simplicial_complex.simplices if len(simplex) == 3]
+
+    
+    def sublevel(self, radius):
+        below_threshold_simplices = [simplex for simplex in self.simplices if self.get_value(simplex) <= radius]
+        sublevel_complex = SimplexComplex(below_threshold_simplices)
+        return sublevel_complex
+    
+    def plotalpha(self, points, alpha_complex):
+        vor = Voronoi(points)
+        self.tri = SimplexComplex.get_2D_simplices(alpha_complex)
+        fig, ax = plt.subplots(figsize=(6.5, 5.5))
+        voronoi_plot_2d(vor, show_vertices=False, line_width=2, line_colors='blue', ax=ax)
+        for simplex in alpha_complex.simplices:
+            ax.plot(points[simplex, 0], points[simplex, 1], 'k-', lw=2)
+
+        c = np.ones(len(self.tri))
+        cmap = matplotlib.colors.ListedColormap("limegreen")
+        ax.tripcolor(points[:, 0], points[:, 1], self.tri, c, edgecolor="k", lw=2, cmap=cmap)
+        ax.plot(points[:, 0], points[:, 1], 'ko')
+        plt.show()
+
+
+    def __str__(self):
+        return str(self.sorted_simplices)
+    
+
+class AlphaComplex(SimplexComplex):
+    def __init__(self, points: np.array) -> None:
+        vor=Voronoi(points) 
+        self.tri = Delaunay(points)
+        fig =voronoi_plot_2d(vor,show_vertices=False,line_width=2,line_colors='blue' ) 
+        c=np.ones(len(points)) 
+        cmap =matplotlib.colors.ListedColormap("limegreen") 
+        plt.tripcolor(points[:,0],points[:,1], self.tri.simplices, c, edgecolor="k", lw=2, cmap=cmap) 
+        plt.plot(points[:,0], points[:,1], 'ko')
+        plt.show()
+    
+        # Add all the vertex to the complex
+        sorted_faces = self.sort_vertex([tuple([int(num) for num in tup]) for tup in self.tri.simplices])
+        aux = SimplexComplex(sorted_faces)
+        super().__init__(aux.n_faces(0))
+        
+        # Add the value of each vertex (set to 0.0)
+        for x in aux.n_faces(0):
+            self.add_simplex(x, 0.0)
+
+        # Add the value of each edge
+        for x in aux.n_faces(1):
+            r = self.compute_edge_value(self.tri.points[x[0]], self.tri.points[x[1]], self.tri.points)
+            if r is not None:
+                self.add_simplex(x, r) 
+
+        # Add the value of each triangle
+        for x in aux.n_faces(2):
+            self.add_simplex(x, self.compute_circumference_radius(self.tri.points[x[0]], self.tri.points[x[1]], self.tri.points[x[2]])) 
+
+    
+    def sort_vertex(self,simplices):
+        sorted_simplices = [tuple(sorted(simplex)) for simplex in simplices]
+        return sorted(sorted_simplices)
+
+
+    def compute_edge_value(self, v1: np.array, v2: np.array, points: np.array) -> float or None:
+        radius = math.dist(v1, v2) * 0.5
+        center = (v1 + v2) * 0.5
+
+        for point in points:
+            # If the point is in the other point's radius, return
+            if math.dist(center, point) < radius and point.tolist() not in (v1.tolist(), v2.tolist()):
+                return None
+
+        return radius
+    
+    
+
+    def compute_circumference_radius(self, a: tuple, b: tuple, c: tuple) -> float:
+        edge_a, edge_b, edge_c = math.dist(c, b), math.dist(a, c), math.dist(a, b)
+        semi_perimeter = (edge_a + edge_b + edge_c) * 0.5
+        radius = edge_a * edge_b * edge_c * 0.25 / math.sqrt(
+            semi_perimeter * (semi_perimeter - edge_a) * (semi_perimeter - edge_b) * (semi_perimeter - edge_c)
+        )
+        return radius
+    
+# Ejemplo de uso
+sc = SimplexComplex([])
+sc.insert([(0,1)],1.0) 
+sc.insert([(1,2),(2,3),(2,4)],2.0) 
+sc.insert([(3,4)],3.0) 
+sc.insert([(2,3,4)],4.0)
+print("Complejo simplicial:", sc)
+print("Complejo simplicial ordenado por valor flotante:", sc.sorted_simplices)
+print("Todas las caras del Complejo simplicial:", sc.face_set)
+K1=sc.filtration(1.0)
+K2=sc.filtration(2.0) 
+K3=sc.filtration(3.0) 
+K4=sc.filtration(4.0)
+
+print("Umbrales después de la inserción:", sc.simplices_values)
+print("Valor asociado a la cara ", sc.threshold((3,)))
+print("Caras ordenadas por umbral y dimensión:", sc.filtrationorder())
+
+print("\n")
+points=np.array([(0.38021546727456423,0.46419202339598786),(0.7951628297672293,0.49263630135869474)
+                ,(0.566623772375203,0.038325621649018426),(0.3369306814864865,0.7103735061134965),
+                (0.08272837815822842,0.2263273314352896),(0.5180166301873989,0.6271769943824689),
+                (0.33691411899985035,0.8402045183219995),(0.33244488399729255,0.4524636520475205),
+                (0.11778991601260325,0.6657734204021165),(0.9384303415747769,0.2313873874340855)])
+plt.plot(points[:,0],points[:,1],'ko') 
+plt.show()
+alpha=AlphaComplex(points)
+print(alpha.simplices_values)
+print(alpha.filtrationorder())
+print(alpha.thresholdvalues())
+
+K=alpha.sublevel(0.26)
+print(K)
+triangles_2D = SimplexComplex.get_2D_simplices(K)
+print(triangles_2D)
+alpha.plotalpha(points,K)
+
+for value in alpha.thresholdvalues(): 
+        K=alpha.sublevel(value) 
+        alpha.plotalpha(points,K) 
+        plt.show()
+
+
+

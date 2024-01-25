@@ -1,0 +1,845 @@
+#Librerias utilizadas en las practicas
+import itertools
+from collections import OrderedDict
+
+
+import numpy as np
+from scipy.spatial import Delaunay,Voronoi, voronoi_plot_2d
+import math
+
+import matplotlib.pyplot as plt 
+import matplotlib.colors 
+from scipy.spatial import distance
+
+class SimplexComplex:
+
+    def __init__(self, simplices):
+        self.simplices = list(simplices)
+        self.face_set = self.calculate_face_set()
+        self.simplices_values = {}  # Nuevo atributo para almacenar los valores flotantes asociados a los símplices
+        self.sorted_simplices = self.sort_simplices()
+
+    def add_simplex(self, simplex, value=0.0):
+            simplex = tuple(simplex)  # Convertir el conjunto a una tupla
+            if simplex not in self.simplices:
+                self.simplices.append(simplex)
+                self.simplices_values[simplex] = value  # Asociar el valor flotante al simplex
+                self.sorted_simplices = self.sort_simplices()
+                self.face_set = self.calculate_face_set()
+
+            # Actualizar umbrales en todas las caras del nuevo símplice
+            for face in self.calculate_face_set():
+                if face not in self.simplices_values:
+                    self.simplices_values[face] = value
+
+    # Metodo adicional
+    def remove_simplex(self, simplex):
+        if simplex in self.simplices:
+            del self.simplices_values[simplex]  # Eliminar el valor flotante asociado al simplex
+            self.simplices.remove(simplex)
+            self.sorted_simplices = self.sort_simplices()
+            self.face_set = self.calculate_face_set()
+
+
+    def dimension(self):
+        # Compruebo si la lista está vacía
+        if not self.simplices:
+            return -1
+        # Si no lo está, entonces devuelvo la dimension maxima con respecto a todos los simplices del complejo
+        return max(len(simplex) - 1 for simplex in self.simplices)
+
+    def calculate_face_set(self):
+        all_faces = set()
+        for simplex in self.simplices:
+            for i in range(1, len(simplex) + 1):
+                for face in itertools.combinations(simplex, i):
+                    all_faces.add(tuple(sorted(face)))
+        return all_faces
+
+
+    def sort_simplices(self):
+        return sorted(self.simplices, key=lambda simplex: (self.get_value(simplex),len(simplex)-1, simplex))
+    
+    def get_value(self, simplex):
+        # Metodo adicional para retornar el umbral de un simplice
+        return self.simplices_values.get(simplex, 0.0)
+
+    def n_faces(self, target_dimension):
+        #Metodo para sacar las caras de una dimension dada
+        return set(face for face in self.face_set if len(face) == target_dimension+1 )
+
+    def st(self, simplex):
+        star = set()
+        star.add(simplex)
+        for k in range((len(simplex) - 1) + 1, self.dimension() + 1):
+            star.update(face for face in self.n_faces(k) if set(simplex).issubset(face))
+        return star
+
+    # Metodo redundante para calcular las caras de un simplice
+    def faces_simplex(self, simplex):
+        lower_dimension_faces = set()
+        simplex_set = set(simplex)
+
+        for k in range(0, (len(simplex)-1) + 1):
+            for face in self.n_faces(k):
+                if set(face).issubset(simplex_set):
+                    lower_dimension_faces.add(face)
+
+        return lower_dimension_faces
+    
+    def faces_simplex_codimension_1(self, simplex):
+        lower_dimension_faces = set()
+        simplex_set = set(simplex)
+
+        for k in range(0, (len(simplex)-1) + 1):
+            for face in self.n_faces(k):
+                if set(face).issubset(simplex_set) and abs((len(face)-1) - (len(simplex)-1))==1:
+                    lower_dimension_faces.add(face)
+
+        return lower_dimension_faces
+
+    
+    def Euler_characteristic(self):
+        n = self.dimension()
+        #Seguir la formula de Euler
+        euler_sum = sum(((-1) ** k) * len(self.n_faces(k)) for k in range(n + 1))
+        return euler_sum
+
+    def closed_star(self, simplex):
+        # Calcula la estrella cerrada de la cara dada
+        star_closed_faces = self.st(simplex)
+
+        # Inicializa un nuevo complejo simplicial con las caras de la estrella cerrada
+        closed_star_complex = SimplexComplex(star_closed_faces)
+
+        # Devuelve las caras del nuevo complejo simplicial
+        return closed_star_complex.face_set
+
+    def lk(self, face):
+        # Calcula el link de la cara dada
+        link_faces = list(filter(lambda x: len(set(x).intersection(face)) == 0, self.closed_star(face)))
+
+        # Devuelve el link de la cara entre llaves
+        return "{" + ", ".join(map(str, link_faces)) + "}"
+
+
+    
+    def connected_components(self):
+        visited = set()
+        components = []
+
+        def dfs(vertex, component):
+            visited.add(vertex)
+            component.add(vertex)
+
+            for neighbor in neighbors[vertex]:
+                if neighbor not in visited:
+                    dfs(neighbor, component)
+
+        neighbors = {vertex: set() for simplex in self.simplices for vertex in simplex}
+
+        for simplex in self.simplices:
+            for vertex in simplex:
+                neighbors[vertex].update(set(simplex) - {vertex})
+
+
+        for vertex in neighbors:
+            if vertex not in visited:
+                new_component = set()
+                dfs(vertex, new_component)
+                components.append(new_component)
+
+        return len(components)
+
+    #Metodo para insertar nuevos simplices
+    def insert(self, new_simplices, value=0.0):
+        for simplex in new_simplices:
+            self.add_simplex(simplex, value)
+
+    def boundarymatrix(self, dimension):
+        if dimension == 0:
+            matrix = np.zeros((1, len(self.n_faces(dimension))), dtype=int)
+            return matrix
+        else:
+            simplices_dim = list(self.n_faces(dimension))
+            simplices_dim_minus_1 = list(self.n_faces(dimension - 1))
+
+            # Ordenar lexicográficamente las listas
+            simplices_dim.sort()
+            simplices_dim_minus_1.sort()
+    
+            matrix = np.zeros((len(simplices_dim_minus_1), len(simplices_dim)), dtype=int)
+            
+            for i, simplex_dim_minus_1 in enumerate(simplices_dim_minus_1):
+                for j, simplex_dim in enumerate(simplices_dim):
+                    if simplex_dim in self.st(simplex_dim_minus_1):
+                        matrix[i, j] = 1
+
+            return matrix
+
+    def general_boundarymatrix(self):
+        dimension = self.dimension()
+        if dimension == 0:
+            matrix = np.zeros((1, len(self.n_faces(dimension))), dtype=int)
+            return matrix
+        else:
+            simplices_dim = list(self.filtrationorder())
+    
+            matrix = np.zeros((len(simplices_dim), len(simplices_dim)), dtype=int)
+            
+            for i, simplex_dim in enumerate(simplices_dim):
+                for j, simplex_dim in enumerate(simplices_dim):
+                    if simplex_dim in self.faces_simplex_codimension_1(simplex_dim):
+                        matrix[i, j] = 1
+
+            return matrix
+        
+    def smith_normal_form(self,matrix):
+        matrix = np.array(matrix)
+        m, n = matrix.shape
+        row_permutation_matrix = np.eye(m)
+        col_permutation_matrix = np.eye(n)
+
+        for i in range(min(m, n)):
+            non_zero_indices = np.where(matrix[i:, i:] != 0)
+            if len(non_zero_indices[0]) == 0:
+                continue
+
+            first_non_zero_row = non_zero_indices[0][0] + i
+            first_non_zero_col = non_zero_indices[1][0] + i
+
+            matrix[[i, first_non_zero_row]] = matrix[[first_non_zero_row, i]]
+            row_permutation_matrix[[i, first_non_zero_row]] = row_permutation_matrix[[first_non_zero_row, i]]
+            matrix[:, [i, first_non_zero_col]] = matrix[:, [first_non_zero_col, i]]
+            col_permutation_matrix[:, [i, first_non_zero_col]] = col_permutation_matrix[:, [first_non_zero_col, i]]
+
+            for j in range(i + 1, m):
+                if matrix[j, i] != 0:
+                    matrix[j] = (matrix[j] + matrix[i]) % 2
+            for k in range(i + 1, n):
+                if matrix[i, k] != 0:
+                    matrix[:, k] = (matrix[:, k] + matrix[:, i]) % 2
+
+        return matrix
+
+    def Betti_number(self,dimension):
+        matrix_boundary=self.boundarymatrix(dimension)
+        matrix_smith=self.smith_normal_form(matrix_boundary)
+        num_rows, num_cols = matrix_smith.shape
+        null_columns = np.all(matrix_smith == 0, axis=0)
+        non_null_columns = np.any(matrix_smith != 0, axis=0)
+
+        num_null_columns = np.sum(null_columns)
+        num_non_null_columns = np.sum(non_null_columns)
+
+        #siguiente dimension
+
+        matrix_boundary_next=self.boundarymatrix(dimension+1)
+        matrix_smith_next=self.smith_normal_form(matrix_boundary_next)
+        num_rows_next, num_cols_next = matrix_smith_next.shape
+        null_columns_next = np.all(matrix_smith_next == 0, axis=0)
+        non_null_columns_next = np.any(matrix_smith_next != 0, axis=0)
+
+        num_null_columns_next = np.sum(null_columns_next)
+        num_non_null_columns_next = np.sum(non_null_columns_next)
+
+        return num_null_columns - num_non_null_columns_next 
+    
+    def algoritmo_incremental(self):
+        betti0 = 0
+        betti1 = 0
+        face_set_list = sorted(list(self.face_set), key=lambda simplex: (len(simplex), simplex))
+        #print("faces",face_set_list)
+        for i in range(self.dimension()+1):
+            for idx, (simplex) in enumerate(face_set_list):
+                N_i = SimplexComplex(face_set_list[:idx+1])
+                #print(N_i)
+                N_i_menos_1 = SimplexComplex(face_set_list[:idx])
+                #print(N_i_menos_1)
+                if i == (len(simplex) - 1):
+                    if i == 0:
+                        betti0 = betti0 + 1
+                    elif i == 2:
+                        betti1 = betti1 - 1
+                    elif i == 1:
+                        if N_i.connected_components() == N_i_menos_1.connected_components():
+                            #print(N_i.connected_components())
+                            betti1 = betti1 + 1
+                        else:
+                            betti0 = betti0 -1
+        return betti0, betti1
+
+    def filtration(self, threshold):
+        below_threshold_simplices = [simplex for simplex in self.simplices if self.get_value(simplex) <= threshold]
+        below_threshold_complex = SimplexComplex(below_threshold_simplices)
+        return below_threshold_complex
+
+    
+    def filtrationorder(self):
+        sorted_faces_with_values = sorted(self.simplices_values.items(), key=lambda item: (item[1], len(item[0])))
+        sorted_faces = [item[0] for item in sorted_faces_with_values]
+
+        # Sort vertices in ascending order
+        sorted_vertices = [simplex for simplex in sorted_faces if len(simplex) == 1]
+        sorted_vertices = sorted(sorted_vertices, key=lambda simplex: simplex[0])
+
+        # Keep the rest of the simplices unchanged
+        for simplex in sorted_faces:
+            if len(simplex) > 1:
+                sorted_vertices.append(simplex)
+
+        return sorted_vertices
+    
+        
+    def threshold(self, face):
+        return self.simplices_values.get(face, 0.0)
+
+    def thresholdvalues(self):
+        all_thresholds = set(value for value in self.simplices_values.values())
+        sorted_thresholds = sorted(all_thresholds)
+        return sorted_thresholds
+    
+    def get_2D_simplices(simplicial_complex):
+        return [simplex for simplex in simplicial_complex.simplices if len(simplex) == 3]
+
+    
+    def sublevel(self, radius):
+        below_threshold_simplices = [simplex for simplex in self.simplices if self.get_value(simplex) <= radius]
+        sublevel_complex = SimplexComplex(below_threshold_simplices)
+        return sublevel_complex
+
+
+    def plotalpha(self, points, alpha_complex):
+        points = np.array(points)
+        vor = Voronoi(points)
+        self.tri = SimplexComplex.get_2D_simplices(alpha_complex)
+        fig, ax = plt.subplots(figsize=(6.5, 5.5))
+        voronoi_plot_2d(vor, show_vertices=False, line_width=2, line_colors='blue', ax=ax)
+        for simplex in alpha_complex.simplices:
+            ax.plot(points[simplex, 0], points[simplex, 1], 'k-', lw=2)
+
+        c = np.ones(len(self.tri))
+        cmap = matplotlib.colors.ListedColormap("limegreen")
+        if self.tri:
+            ax.tripcolor(points[:, 0], points[:, 1], self.tri, c, edgecolor="k", lw=2, cmap=cmap)
+        ax.plot(points[:, 0], points[:, 1], 'ko')
+        plt.show()
+
+    
+
+    def __str__(self):
+        return str(self.sorted_simplices)
+    
+
+class AlphaComplex(SimplexComplex):
+    def __init__(self, points: np.array) -> None:
+        vor=Voronoi(points) 
+        self.tri = Delaunay(points)
+        #print(self.tri.simplices)
+        fig =voronoi_plot_2d(vor,show_vertices=False,line_width=2,line_colors='blue' ) 
+        c=np.ones(len(points)) 
+        cmap =matplotlib.colors.ListedColormap("limegreen") 
+        points = np.array(points)#adesion
+        plt.tripcolor(points[:,0],points[:,1], self.tri.simplices, c, edgecolor="k", lw=2, cmap=cmap) 
+        plt.plot(points[:,0], points[:,1], 'ko')
+        plt.show()
+    
+        # Add all the vertex to the complex
+        sorted_faces = self.sort_vertex([tuple([int(num) for num in tup]) for tup in self.tri.simplices])
+        aux = SimplexComplex(sorted_faces)
+        super().__init__(aux.n_faces(0))
+        
+        # Add the value of each vertex (set to 0.0)
+        for x in aux.n_faces(0):
+            self.add_simplex(x, 0.0)
+
+        # Add the value of each edge
+        for x in aux.n_faces(1):
+            r = self.compute_edge_value(self.tri.points[x[0]], self.tri.points[x[1]], self.tri.points)
+            if r is not None:
+                self.add_simplex(x, r) 
+
+        # Add the value of each triangle
+        for x in aux.n_faces(2):
+            self.add_simplex(x, self.compute_circumference_radius(self.tri.points[x[0]], self.tri.points[x[1]], self.tri.points[x[2]])) 
+
+    
+    def sort_vertex(self,simplices):
+        sorted_simplices = [tuple(sorted(simplex)) for simplex in simplices]
+        return sorted(sorted_simplices)
+
+
+    def compute_edge_value(self, v1: np.array, v2: np.array, points: np.array) -> float or None:
+        radius = math.dist(v1, v2) * 0.5
+        center = (v1 + v2) * 0.5
+
+        for point in points:
+            # If the point is in the other point's radius, return
+            if math.dist(center, point) < radius and point.tolist() not in (v1.tolist(), v2.tolist()):
+                return None
+
+        return radius
+    
+    def compute_circumference_radius(self, a: tuple, b: tuple, c: tuple) -> float:
+        edge_a, edge_b, edge_c = math.dist(c, b), math.dist(a, c), math.dist(a, b)
+        semi_perimeter = (edge_a + edge_b + edge_c) * 0.5
+        radius = edge_a * edge_b * edge_c * 0.25 / math.sqrt(
+            semi_perimeter * (semi_perimeter - edge_a) * (semi_perimeter - edge_b) * (semi_perimeter - edge_c)
+        )
+        return radius
+    
+    def general_boundarymatrix(self):
+        dimension = self.dimension()
+        if dimension == 0:
+            matrix = np.zeros((1, len(self.n_faces(dimension))), dtype=int)
+            return matrix
+        else:
+            simplices_dim = list(self.filtrationorder())
+            #simplices_dim = [(0,), (1,), (2,), (3,), (4,), (5,), (0, 3), (2, 4), (3, 5), (4, 5), (1, 2), (0, 1), (1, 3), (1, 4), (3, 4), (0, 1, 3), (1, 2, 4), (3, 4, 5), (1, 3, 4)]
+        
+            matrix = np.zeros((len(simplices_dim), len(simplices_dim)), dtype=int)
+            
+            for i, row_simplex_dim in enumerate(simplices_dim):
+                for j, col_simplex_dim in enumerate(simplices_dim):
+                    if row_simplex_dim in self.faces_simplex_codimension_1(col_simplex_dim):
+                        matrix[i, j] = 1
+            np.set_printoptions(threshold=np.inf)
+            return matrix
+        
+    def calculate_low(self,matrix, column_index):
+        column_values = matrix[:, column_index]
+        non_zero_indices = np.where(column_values == 1)[0]
+
+        if len(non_zero_indices) == 0:
+            return -1  # Retorna -1 si no hay elementos no nulos en la columna
+
+        low_value = np.max(non_zero_indices)
+        return low_value
+    
+    def reduce_matrix_by_columns(self, matrix):
+        n = matrix.shape[1]  # Número de columnas de la matriz
+
+        j = 0
+        while j < n:
+            low_j = self.calculate_low(matrix, j)
+
+            if low_j != -1:
+                j0 = j - 1
+                while j0 >= 0:
+                    low_j0 = self.calculate_low(matrix, j0)
+                    if low_j0 == low_j:
+                        matrix[:, j] ^= matrix[:, j0]
+                        # Continuar el proceso en la misma columna
+                        j-=1
+                        break
+                    j0 -= 1
+
+            j += 1
+
+        return matrix
+
+    
+    def choose_points(self,matriz):
+        filas = len(matriz)
+        columnas = len(matriz[0]) if filas > 0 else 0
+        simplices_dim = self.filtrationorder()
+        dimensiones=max(len(simplex) - 1 for simplex in simplices_dim)
+        dim=list(range(dimensiones+1))
+        puntos=[]
+        for d in dim:
+            for i in range(filas):
+                for j in range(columnas):
+                    if self.calculate_low(matriz,j) == i and (len(simplices_dim[i])-1)==d:
+                        #print("anado el punto 1")
+                        x=self.threshold(simplices_dim[i])
+                        y=self.threshold(simplices_dim[j])
+                        punto=(x,y)
+                        #print(punto)
+                        puntos.append(punto)
+                    if self.es_columna_nula(matriz,i) and self.calculate_low(matriz,j) != i:
+                        print("anado el punto 2")
+        return puntos
+    
+    def choose_points2(self,matriz):
+        filas, columnas = matriz.shape
+        simplices_dim = self.filtrationorder()
+        #simplices_dim = [(0,), (1,), (2,), (3,), (4,), (5,), (0, 3), (2, 4), (3, 5), (4, 5), (1, 2), (0, 1), (1, 3), (1, 4), (3, 4), (0, 1, 3), (1, 2, 4), (3, 4, 5), (1, 3, 4)]
+        dimensiones=max(len(simplex) - 1 for simplex in simplices_dim)
+        dim=list(range(dimensiones+1))
+        puntos=[]
+        #for d in dim:
+        for j in range(columnas):
+            if self.es_columna_nula(matriz,j) == False:
+                low=self.calculate_low(matriz,j)
+                x=self.threshold(simplices_dim[low])
+                y=self.threshold(simplices_dim[j])
+                punto=(x,y)
+                puntos.append(punto)
+
+        min_dimension = min(matriz.shape)
+        for i in range(min_dimension):
+            if self.es_columna_nula(matriz,i):
+                for k in range(columnas):
+                    encontrado=False
+                    if self.calculate_low(matriz,k)==i:
+                        encontrado=True
+                        break
+                if encontrado==False:
+                    x=self.threshold(simplices_dim[i])
+                    y=float('inf')
+                    punto=(x,y)
+                    puntos.append(punto)
+        return puntos
+
+    def es_columna_nula(self,matriz, indice_columna):
+        for fila in matriz:
+            if fila[indice_columna] != 0:
+                return False
+        return True
+
+
+
+class Vietoris_RipsComplex(SimplexComplex):
+    def __init__(self, points: np.array) -> None:
+        super().__init__([])
+        self.points = points
+        point_positions = tuple(i for i in range(len(points)))
+        faces = self.all_faces({point_positions}, point_positions)
+        #print(faces)
+        for face in faces:
+            max_dist_example = self.max_distance_in_face(face, points)
+            #print(max_dist_example)
+        #self.faces = self.get_all_radios(faces, self.points)
+        # Add all the vertex to the complex
+        sorted_faces = self.sort_vertex([tuple([int(num) for num in tup]) for tup in faces])
+        aux = SimplexComplex(sorted_faces)
+        #print("soy aux de vietoris-rips",aux)
+        super().__init__(aux.n_faces(0))
+        #print("distancia de (0, 5, 6)",self.max_distance_in_face((0, 5, 6),points))
+        for face in faces:
+            if len(face)-1 == 0.0:
+                # Add the value of each vertex (set to 0.0)
+                    self.add_simplex(face, 0.0)
+            else:
+            # Add the value of each edge
+                r = self.max_distance_in_face(face, points)
+                if r is not None:
+                    self.add_simplex(face, r)
+
+            
+    def sort_vertex(self,simplices):
+        sorted_simplices = [tuple(sorted(simplex)) for simplex in simplices]
+        return sorted(sorted_simplices)
+
+    def all_faces(self, combinations: set, points: tuple) -> set:
+        for i in range(len(points)):
+            sub_face = tuple(j for j in points if i != j)
+            previous_size = len(combinations)
+            combinations.add(sub_face)
+            if len(combinations) == previous_size:
+                return combinations
+            self.all_faces(combinations, sub_face)
+        return combinations
+    
+    def max_distance_in_face(self,face, points):
+
+        max_dist = 0.0
+
+        for i in range(len(face)):
+            for j in range(i + 1, len(face)):
+                #x=points[face[i]]
+                #y=points[face[j]]
+                dist_ij = math.dist(points[face[i]], points[face[j]])*0.5
+                max_dist = max(max_dist, dist_ij)
+
+        return max_dist
+
+
+
+def plot_points(points):
+    x_dgm0 = [point[0] for point in points if point[0] == 0]
+    y_dgm0 = [point[1] for point in points if point[0] == 0 and not np.isinf(point[1])]
+    x_dgm1 = [point[0] for point in points if point[0] != 0]
+    y_dgm1 = [point[1] for point in points if point[0] != 0 and not np.isinf(point[1])]
+
+    # Asegúrate de que ambas listas tengan la misma longitud
+    min_len = min(len(x_dgm0), len(y_dgm0))
+    x_dgm0 = x_dgm0[:min_len]
+    y_dgm0 = y_dgm0[:min_len]
+
+    min_len = min(len(x_dgm1), len(y_dgm1))
+    x_dgm1 = x_dgm1[:min_len]
+    y_dgm1 = y_dgm1[:min_len]
+
+    plt.xlabel('Birth Time')
+    plt.ylabel('Death Time')
+
+    # Encuentra los valores máximos en los ejes x e y
+    max_x = max(max(x_dgm0, default=0), max(x_dgm1, default=0))
+    max_y = max(max(y_dgm0, default=0), max(y_dgm1, default=0))
+
+    max_xy = max(max_x, max_y)
+    max_xy = np.ceil(max_xy)
+
+
+    # Ajusta los límites de los ejes x e y con espacio adicional
+    plt.xlim(-0.1, max_xy + 1 )
+    plt.ylim(-0.1, max_xy + 1 )
+
+    # Ajusta los intervalos de los ejes x e y a 1 en 1
+    #plt.xticks(np.arange(0, max_xy + 5, 1))
+    #plt.yticks(np.arange(0, max_xy + 5, 1))
+
+    # Agregar la línea diagonal discontinua negra
+    diagonal_length = max(max_xy, max_xy) + 5
+    diagonal_x = np.linspace(0, diagonal_length, 100)
+    diagonal_y = diagonal_x
+    plt.plot(diagonal_x, diagonal_y, '--', color='black', label='∞')
+
+    # Agregar línea horizontal desde el punto aislado hasta el final
+    for point in points:
+        if np.isinf(point[1]):
+            if point[0]==0:
+                plt.scatter(point[0], max_xy+0.98, color='blue')
+            else:
+                plt.scatter(point[0], max_xy+0.98, color='red')
+            plt.plot([point[0], max_xy+0.98], [max_xy+0.98, max_xy+0.98], '--', color='black')
+
+    # Agregar puntos dgm0 y dgm1
+    plt.scatter(x_dgm0, y_dgm0, color='blue', label='dgm0')
+    plt.scatter(x_dgm1, y_dgm1, color='red', label='dgm1')
+
+    # Eliminar línea superior y línea derecha
+    plt.gca().spines['right'].set_color('none')
+    plt.gca().spines['top'].set_color('none')
+
+    # Agregar leyenda en la parte inferior derecha
+    plt.legend(loc='lower right')
+
+    plt.show()
+
+def plot_horizontal_bars(points):
+    points = sorted(points, key=lambda p: (p[0], p[1]))
+    x_0 = []
+    for i, point in enumerate(points):
+        if point[0] == 0 and not np.isinf(point[1]):
+            x_0.append(i)
+    y_0 = [point[1] for point in points if point[0] == 0 and not np.isinf(point[1])]
+
+    for point in points:
+        if np.isinf(point[1]):
+            if point[0]==0:
+                x_0.append(len(x_0))
+                y_0.append(857384584)
+
+    x_1 = []
+    for j, point in enumerate(points):
+        if point[0] != 0 and not np.isinf(point[1]):
+            x_1.append(j+2)
+    y_1 = [point[1] for point in points if point[0] != 0 and not np.isinf(point[1])]
+
+    for point in points:
+        if np.isinf(point[1]):
+            if point[0]!=0:
+                x_1.append(len(x_1))
+                y_1.append(8)
+
+    x_total = [point[0] for point in points if point[0] != 0]
+    
+    print(x_total)
+    print(x_0)
+    print(y_0)
+    print(x_1)
+    print(y_1)
+    max_x = max(max(x_0, default=0), max(x_1, default=0))
+    max_y = max(y_1)
+    #max_xy = max(max_x, max_y)
+    #max_xy = np.ceil(max_xy)
+    max_x = np.ceil(max_x)
+    max_y = np.ceil(max_y)
+    # Gráfico de barras
+    fig, ax = plt.subplots()
+    ax.barh(x_0, width=y_0, height=0.075, color='blue', label='H0')
+    ax.barh(x_1, width=y_1, height=0.075, left=x_total, color='red', label='H1')
+    ax.hlines(y=len(x_0)-0.5, xmin=0, xmax=9, color='black')
+    
+    # Hacer invisible el eje y
+    ax.yaxis.set_visible(False)
+    
+    # Eliminar línea superior y línea derecha
+    ax.spines['left'].set_color('none')
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+
+    ax.set_xlim(-0.1, max_y+1)
+    ax.set_ylim(-0.1, max_x)
+    
+    # Agregar texto para indicar H0 y H1
+    ax.text(-0.2, len(x_0)-3, 'H0', fontsize=10, verticalalignment='center')
+    ax.text(-0.2, len(x_0)+len(x_1)+2, 'H1', fontsize=10, verticalalignment='center')
+    
+    
+    plt.show()
+
+
+ 
+# Ejemplo de uso
+print("Practica 1")
+print("Ejemplo 1")
+sc1 = SimplexComplex([(0, 1, 2, 3)])
+print("Complejo simplicial:", sc1)
+print("Dimension del complejo simplicial:", sc1.dimension())
+print("Conjunto de todas las caras:", sc1.face_set)
+print("Conjunto de caras de dimensión especifica:", sc1.n_faces(0))
+print("Estrella del símplice", sc1.st((0,)))
+print("Link del simplice", sc1.lk((0,1)))
+print("Característica de Euler:", sc1.Euler_characteristic())
+print("Número de componentes conexas:", sc1.connected_components())
+
+print("\n Ejemplo 2")
+sc1_2 = SimplexComplex([(0,1),(1,2,3,4),(4,5),(5,6),(4,6),(6,7,8),(8,9)])
+print("Complejo simplicial:", sc1_2)
+print("Dimension del complejo simplicial:", sc1_2.dimension())
+print("Conjunto de todas las caras:", sc1_2.face_set)
+print("Conjunto de caras de dimensión especifica:", sc1_2.n_faces(0))
+print("Estrella del símplice", sc1_2.st((4,)))
+print("Link del simplice", sc1_2.lk((4,)))
+print("Característica de Euler:", sc1_2.Euler_characteristic())
+print("Número de componentes conexas:", sc1_2.connected_components())
+
+sc = SimplexComplex([])
+sc.insert([(0,1)],1.0) 
+sc.insert([(1,2),(2,3),(2,4)],2.0) 
+sc.insert([(3,4)],3.0) 
+sc.insert([(2,3,4)],4.0)
+print("Complejo simplicial despues de hacer el insert:", sc)
+print("Caras del complejo simplicial",sc.face_set)
+print(sc.threshold((3,)))
+print("Complejo simplicial ordenado por valor flotante:", sc.sorted_simplices)
+print("Complejo simplicial con simplices de menor umbral dado:",sc.filtration(1.0))
+print(sc.filtrationorder())
+
+
+print("\n")
+
+print("Practica 2")
+
+"""points=np.array([(0.38021546727456423,0.46419202339598786),(0.7951628297672293,0.49263630135869474)
+                ,(0.566623772375203,0.038325621649018426),(0.3369306814864865,0.7103735061134965),
+                (0.08272837815822842,0.2263273314352896),(0.5180166301873989,0.6271769943824689),
+                (0.33691411899985035,0.8402045183219995),(0.33244488399729255,0.4524636520475205),
+                (0.11778991601260325,0.6657734204021165),(0.9384303415747769,0.2313873874340855)])"""
+
+"""points=np.array([(0.8957641450573793, 0.2950833519989374), (0.028621391963087994, 0.9440875759025237),
+                  (0.517621505875702, 0.1236620161847416), (0.7871047164191424, 0.7777474116014623), 
+                  (0.21869796914805273, 0.7233589914276723), (0.9891035292480995, 0.6032186214942837),
+                  (0.30113764052453484, 0.613321425324272), (0.18407448222466916, 0.7868606964403773),
+                  (0.4496777667376678, 0.874366215574117), (0.08225571534539433, 0.616710205071694)])"""
+
+"""points=np.array([(0,7),(7,8),(14,7),(3,4),(11,4),(7,0)])"""
+points=np.array([(3,1),(2,1),(2.5,0.35),(2.5,1.866025404),(1.625000001,1.530330086),(3.374999999,1.530330086)])
+#points=np.array([(np.cos(0),np.sin(0)),(np.cos(np.pi/6),np.sin(np.pi/6)),(np.cos(2*np.pi/6),np.sin(2*np.pi/6)),(np.cos(np.pi/2),np.sin(np.pi/2)),(np.cos(2*np.pi/3),np.sin(2*np.pi/3)),(np.cos(5*np.pi/6),np.sin(5*np.pi/6)),(np.cos(np.pi),np.sin(np.pi)),(np.cos(7*np.pi/6),np.sin(7*np.pi/6)),(np.cos(4*np.pi/3),np.sin(4*np.pi/3)),(np.cos(3*np.pi/2),np.sin(3*np.pi/2)),(np.cos(5*np.pi/3),np.sin(5*np.pi/3)),(np.cos(11*np.pi/6),np.sin(11*np.pi/6))])
+plt.plot(points[:,0],points[:,1],'ko') 
+plt.show()
+print("calculamos la filtracion:")
+alpha=AlphaComplex(points)
+print("Lista de símplices del complejo ordenadas según su umbral de aparación:",alpha.filtrationorder())
+print("Lista de umbrales:",alpha.thresholdvalues())
+print("Calculamos y representamos gráficamente el alfa complejo para r=0.26")
+#K=alpha.sublevel(0.26)
+#alpha.plotalpha(points,K)
+
+
+"""for value in alpha.thresholdvalues():  
+    K=alpha.sublevel(value) 
+    alpha.plotalpha(points,K) 
+    plt.show()"""
+
+print("\n")
+
+VR = Vietoris_RipsComplex(points)
+print("Lista de símplices del complejo ordenadas según su umbral de aparación:",VR.filtrationorder())
+print("Lista de umbrales:",VR.thresholdvalues())
+
+print("\nPractica 3")
+
+boundary_matrix = sc.boundarymatrix(1)
+print("\nCalculo de matriz de borde de dimension dada:")
+print(boundary_matrix)
+result_matrix = sc.smith_normal_form(boundary_matrix)
+print("\nMatriz en forma normal de Smith:")
+print(result_matrix)
+
+
+print("Numeros de Betti del:")
+print("Tetraedro:")
+print(sc.Betti_number(0),sc.Betti_number(1),sc.Betti_number(2),sc.Betti_number(3))
+print("Borde del tetraedro:")
+sc1=SimplexComplex(list(sc.n_faces(2)))
+print(sc1.Betti_number(0),sc1.Betti_number(1),sc1.Betti_number(2),sc1.Betti_number(3))
+print("El toro con las dos triangulaciones vistas en clase:")
+sc2_1=SimplexComplex([(1,2,4),(2,4,5),(2,3,5),(3,5,6),(1,3,6),(1,4,6),(4,5,7),(5,7,8),(5,6,8),(6,8,9),(4,6,9),(4,7,9),(1,7,8),(1,2,8),(2,8,9),(2,3,9),(3,7,9),(1,3,7)])
+print(sc2_1.Betti_number(0),sc2_1.Betti_number(1),sc2_1.Betti_number(2),sc2_1.Betti_number(3))
+sc2_2=SimplexComplex([(1,7,3),(1,2,3),(2,5,7),(3,2,6),(2,5,6),(3,5,7),(3,4,6),(6,5,1),(1,4,5),(3,4,5),(4,7,6),(1,6,7),(1,2,4),(2,4,7)])
+print(sc2_2.Betti_number(0),sc2_2.Betti_number(1),sc2_2.Betti_number(2),sc2_2.Betti_number(3))
+print("El plano proyectivo:")
+sc3=SimplexComplex([(1,2,6),(2,3,4),(1,3,4),(1,2,5),(2,3,5),(1,3,6),(2,4,6),(1,4,5),(3,5,6),(4,5,6)])
+print(sc3.Betti_number(0),sc3.Betti_number(1),sc3.Betti_number(2),sc3.Betti_number(3))
+print("La botella de Klein:")
+sc4=SimplexComplex([(0,1,3),(1,3,4),(1,2,4),(2,4,5),(2,5,0),(0,5,6),(3,4,6),(6,4,7),(4,5,7),(5,7,8),(8,5,6),(3,6,8),(0,7,6),(1,0,7),(1,7,8),(1,2,8),(2,3,8),(2,3,0)])
+print(sc4.Betti_number(0),sc4.Betti_number(1),sc4.Betti_number(2),sc4.Betti_number(3))
+print("El anillo:")
+sc5=SimplexComplex([(1,2,4),(1,3,6),(1,4,6),(2,3,5),(2,4,5),(3,5,6)])
+print(sc5.Betti_number(0),sc5.Betti_number(1),sc5.Betti_number(2),sc5.Betti_number(3))
+print("El sombrero del asno:")
+sc6=SimplexComplex([(1,2,4),(1,3,4),(3,4,8),(3,2,8),(1,2,8),(2,4,5),(5,6,4),(6,4,8),(8,6,7),(1,7,8),(1,2,7),(3,1,5),(1,5,6),(1,3,6),(6,3,7),(2,7,3)])
+print(sc6.Betti_number(0),sc6.Betti_number(1),sc6.Betti_number(2),sc6.Betti_number(3))
+print("Del complejo simplicial de la transparencia 4 del documento Homología Simplicial II:")
+sc7=SimplexComplex([(0,1),(1,2,3,4),(4,5),(5,6),(4,6),(6,7,8),(8,9)])
+print(sc7.Betti_number(0),sc7.Betti_number(1),sc7.Betti_number(2),sc7.Betti_number(3))
+print("Del doble toro:")
+sc8=SimplexComplex([(1,2,4),(2,4,5),(2,5,3),(3,5,6),(1,3,6),(1,6,4),(4,5,7),(5,7,8),(8,5,6),(6,8,9),(6,4,9),(4,9,7),(1,7,8),(1,2,8),(2,8,9),(2,9,3),(3,9,7),(3,7,11),(10,7,11),(10,11,12),(10,1,12),(1,12,3),(3,11,13),(13,11,14),(11,12,14),(12,14,15),(12,15,3),(3,15,13),(1,13,14),(1,14,7),(14,15,7),(7,15,10),(15,10,13),(10,13,1)])
+print(sc8.Betti_number(0),sc8.Betti_number(1),sc8.Betti_number(2),sc8.Betti_number(3))
+print("De algunos alfa complejos:")
+print(alpha)
+print(alpha.Betti_number(0),alpha.Betti_number(1),alpha.Betti_number(2),alpha.Betti_number(3))
+print("Con el algoritmo incemental:")
+sc9=SimplexComplex([(1,2,0),(0,2,9),(2,3,6),(3,4,6),(4,5,6),(5,6,7),(7,9),(7,8),(8,9)])
+print(sc9.algoritmo_incremental())
+print(alpha.algoritmo_incremental())
+print("\n Practica 4")
+#points2=np.array([(1.25,7.25),(7,8.5),(12.75,7.25),(3,4),(11,4),(7,0)])
+#points2=np.array([(3,1),(2,1),(2.5,0.35),(2.5,1.866025404),(1.625000001,1.530330086),(3.374999999,1.530330086)])
+points2=np.array([(np.cos(0),np.sin(0)),(np.cos(np.pi/6),np.sin(np.pi/6)),(np.cos(2*np.pi/6),np.sin(2*np.pi/6)),(np.cos(np.pi/2),np.sin(np.pi/2)),(np.cos(2*np.pi/3),np.sin(2*np.pi/3)),(np.cos(5*np.pi/6),np.sin(5*np.pi/6)),(np.cos(np.pi),np.sin(np.pi)),(np.cos(7*np.pi/6),np.sin(7*np.pi/6)),(np.cos(4*np.pi/3),np.sin(4*np.pi/3)),(np.cos(3*np.pi/2),np.sin(3*np.pi/2)),(np.cos(5*np.pi/3),np.sin(5*np.pi/3)),(np.cos(11*np.pi/6),np.sin(11*np.pi/6))])
+#points2=np.array([(np.cos(0),np.sin(0)),(np.cos(np.pi/6),np.sin(np.pi/6)),(np.cos(2*np.pi/6),np.sin(2*np.pi/6)),(np.cos(np.pi/2),np.sin(np.pi/2)),(np.cos(2*np.pi/3),np.sin(2*np.pi/3)),(np.cos(5*np.pi/6),np.sin(5*np.pi/6)),(np.cos(np.pi),np.sin(np.pi)),(np.cos(7*np.pi/6),np.sin(7*np.pi/6)),(np.cos(4*np.pi/3),np.sin(4*np.pi/3)),(np.cos(3*np.pi/2),np.sin(3*np.pi/2)),(np.cos(5*np.pi/3),np.sin(5*np.pi/3)),(np.cos(11*np.pi/6),np.sin(11*np.pi/6))])
+"""num_points = 35
+#circunferencia
+theta = np.linspace(0, 2*np.pi, num_points)
+x = np.cos(theta) + 0.1 * np.random.normal(size=num_points)
+y = np.sin(theta) + 0.1 * np.random.normal(size=num_points)
+points2 = list(zip(x, y))"""
+
+""""a = 2.0
+b = 1.0
+
+# Número de puntos
+num_points = 50
+
+# Calcular las coordenadas paramétricas de los puntos con un componente aleatorio
+theta = np.linspace(0, 2*np.pi, num_points)
+x = a * np.cos(theta) + 0.1 * np.random.normal(size=num_points)
+y = b * np.sin(theta) + 0.1 * np.random.normal(size=num_points)
+
+# Crear una lista de puntos
+points2 = list(zip(x, y))"""
+
+
+alpha2=AlphaComplex(points2)
+print("Calculo la matriz borde generalizado de un complejo simplicial filtrado:")
+print(alpha.general_boundarymatrix())
+print("calculo el low de una columna de una matriz:",alpha.calculate_low(alpha.general_boundarymatrix(),1))
+print("Reducir por columnas una matriz cuadrada:")
+print(alpha.reduce_matrix_by_columns(alpha.general_boundarymatrix()))
+print("Calculo de puntos del diagrama de persistencia:",alpha.choose_points2(alpha.reduce_matrix_by_columns(alpha.general_boundarymatrix())))
+plot_points(alpha2.choose_points2(alpha2.reduce_matrix_by_columns(alpha2.general_boundarymatrix())))
+plot_horizontal_bars(alpha2.choose_points2(alpha2.reduce_matrix_by_columns(alpha2.general_boundarymatrix())))

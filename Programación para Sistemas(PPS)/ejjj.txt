@@ -1,0 +1,34 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define M 1000
+int main(){
+ int arr[M];/*me creo un array para almacenar los valores del fichero*/
+ char aux[M];/*me creo un array de chars para almacenar las palabras del fichero*/
+ int elem=0;/* me declaro un contador*/
+
+     while(scanf("%d",&arr[elem])==1){ /*recorro el fichero*/
+
+       elem++;
+
+       while(scanf("%d",&arr[elem])==1 && elem<=M){/*mientras leo un numero,avanzo*/
+            elem++;
+       }
+        while( elem>1){ /*entro en este while cuando encuentra una palabra e imprimo el arra>
+             printf("%d ",arr[elem-1]);
+             elem--;
+             if(elem<=1){/*creo esta condicion para imprimir el ultimo digito sin espacio y >
+               printf("%d\n",arr[0]);
+               break;
+             }
+           }
+       scanf("%s",aux); /*aqui hago que se guarden las palabras en el array aux*/
+       elem=0; /*cambio el valor del contador a 0 para volver a realizar el proceso*/
+        }
+
+ return 0;
+}
+
+
+
+
+ejer4

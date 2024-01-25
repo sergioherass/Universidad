@@ -1,0 +1,57 @@
+// Comando time
+if (strcmp(argv[0], "time") == 0) {
+    if (argc == 1) {
+        // Informar sobre el consumo del minishell y sus hijos
+        struct tms tmsbuf;
+        clock_t start, end;
+
+        start = times(&tmsbuf);
+        // Aquí puedes agregar el código necesario para ejecutar el comando proporcionado
+        end = times(&tmsbuf);
+
+        // Calcular y mostrar los tiempos de ejecución
+        long ticks_per_second = sysconf(_SC_CLK_TCK);
+        double user_time = (double)tmsbuf.tms_utime / ticks_per_second;
+        double system_time = (double)tmsbuf.tms_stime / ticks_per_second;
+        double real_time = (double)(end - start) / ticks_per_second;
+
+        printf("%d.%03du %d.%03ds %d.%03dr\n",
+               (int)user_time, (int)(user_time * 1000) % 1000,
+               (int)system_time, (int)(system_time * 1000) % 1000,
+               (int)real_time, (int)(real_time * 1000) % 1000);
+
+    } else {
+        // Ejecutar el comando proporcionado e informar sobre su consumo
+        pid_t pid;
+        struct tms tmsbuf;
+        clock_t start, end;
+
+        start = times(&tmsbuf);
+        pid = fork();
+        if (pid == 0) {
+            // Proceso hijo: ejecutar el comando proporcionado
+            if (execvp(argv[1], &argv[1]) == -1) {
+                perror("Error: No se pudo ejecutar el comando");
+                exit(1);
+            }
+        } else if (pid > 0) {
+            // Proceso padre: esperar a que el hijo termine
+            int status;
+            waitpid(pid, &status, 0);
+            end = times(&tmsbuf);
+
+            // Calcular y mostrar los tiempos de ejecución
+            long ticks_per_second = sysconf(_SC_CLK_TCK);
+            double user_time = (double)tmsbuf.tms_cutime / ticks_per_second;
+            double system_time = (double)tmsbuf.tms_cstime / ticks_per_second;
+            double real_time = (double)(end - start) / ticks_per_second;
+
+            printf("%d.%03du %d.%03ds %d.%03dr\n",
+                   (int)user_time, (int)(user_time * 1000) % 1000,
+                   (int)system_time, (int)(system_time * 1000) % 1000,
+                   (int)real_time, (int)(real_time * 1000) % 1000);
+        } else {
+            perror("Error: No se pudo crear el proceso hijo");
+        }
+    }
+}

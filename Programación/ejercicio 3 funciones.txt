@@ -1,0 +1,25 @@
+import java.util.Scanner;
+public class MyClass {
+    public static void main(String args[]) {
+        Scanner sc=new Scanner(System.in);
+        int dividendo= sc.nextInt();
+        System.out.print("Introduce dividendo");
+        int divisor=sc.nextInt();
+        System.out.print("Introduce divisor");
+        if(divisor==0){
+           System.out.print("Error:no se puede dividir"); 
+        } System.out.print("Es multiplo?" +esMultiplo(dividendo,divisor));
+    }
+    public static boolean esMultiplo (int x, int y){
+        boolean multiplo= (x%y==0);
+        
+        if (x%y==0){
+            multiplo=true;
+            System.out.println("X es múltiplo de Y");
+        } else{ 
+            multiplo=false;
+            System.out.println("X no es múltiplo de Y");
+        }
+        return multiplo;
+    }
+ }
